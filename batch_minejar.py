@@ -16,7 +16,9 @@ def run_mine(tabfile=None, offset=None, minejar_file=None, work_dir=None):
   offset = int(offset)
 
   # Copy tabfile to tmpdir from offset.
-  tab_tmpfile = os.path.join(TMPDIR, "%s_%d.tab" % (tabfile.rpartition('.')[0], offset))
+  tabfile_basename = os.path.basename(tabfile)
+  tab_tmpfile = os.path.join(TMPDIR, "%s_%d.tab" % \
+                               (tabfile_basename.rpartition('.')[0], offset))
   fp_in = open(tabfile, 'r')
   fp_out = open(tab_tmpfile, 'w')
   i = 0
