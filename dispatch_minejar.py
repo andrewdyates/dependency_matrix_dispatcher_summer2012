@@ -1,5 +1,8 @@
 #!/usr/bin/python
-"""desc.
+"""Dispatch one-per-variable MINE.jar jobs using parallel-command-processor.
+
+EXAMPLE USE:
+  python dispatch_minejar.py tabfile=$HOME/gse15745/GSE15745.GPL6104.mRNA.normed.tab
 """
 import os, sys
 import subprocess
@@ -29,13 +32,15 @@ mpiexec parallel-command-processor %(dispatch_script)s
 
 def dispatch(tabfile=None, n_nodes=2, n_ppn=12, walltime='6:00:00', \
          work_dir=WORK_DIR, minejar_file=MINEJAR_FILE, dry=False, start_offset=0, \
-         jobname=None, out_dir=None):
+         jobname=None):
   """Create parallel-command-processor script and start paralell job.
   """
-  assert tabfile and jobname and out_dir
+  assert tabfile
   n_nodes, n_ppn, start_offset = map(int, (n_nodes, n_ppn, start_offset))
   if type(dry) == str and dry.lower() in ('false', 'f', 'none', ''):
     dry=False
+  if jobname is None: 
+    jobname = os.path.basename(tabfile)
 
   # Copy tabfile to WORK_DIR.
   tab_basename = os.path.basename(tabfile)
@@ -66,8 +71,8 @@ def dispatch(tabfile=None, n_nodes=2, n_ppn=12, walltime='6:00:00', \
       'offset': offset, 
       'minejar_file': minejar_file,
       'work_dir': work_dir,
-      'stdout_fname': os.path.join(out_dir, "log_"+jobname+"_"+tstamp+".out"),
-      'stderr_fname': os.path.join(out_dir, "log_"+jobname+"_"+tstamp+".err"),
+      'stdout_fname': os.path.join(work_dir, "log_"+jobname+"_"+tstamp+".out"),
+      'stderr_fname': os.path.join(work_dir, "log_"+jobname+"_"+tstamp+".err"),
       }
     fp.write(cmd); fp.write('\n')
     offset += 1
