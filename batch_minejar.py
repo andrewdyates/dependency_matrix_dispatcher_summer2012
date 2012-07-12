@@ -3,14 +3,16 @@
 import sys, os
 import subprocess
 
-BATCH_CMD = "python %(script_path)s/batch_minejar.py tabfile=%(tabfile)s offset=%(offset)d minejar_file=%(minejar_file)s work_dir=%(work_dir)s >> %(stdout_fname)s 2>> %(stderr_fname)s"
-TMPDIR = os.environ['TMPDIR']
+try:
+  TMPDIR = os.environ['TMPDIR']
+except KeyError:
+  TMPDIR = os.environ['HOME']
 
 MINEJAR_CMD = "java -jar %(minejar_file)s %(tabfile)s 0"
 
-def run_mine(script_path=None, tabfile=None, offset=None, minejar_file=None, work_dir=None):
+def run_mine(tabfile=None, offset=None, minejar_file=None, work_dir=None):
   """ """
-  assert None not in (script_path, tabfile, offset, minejar_file, work_dir)
+  assert None not in (tabfile, offset, minejar_file, work_dir)
   offset = int(offset)
 
   # Copy tabfile to tmpdir from offset.
