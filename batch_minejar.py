@@ -2,6 +2,7 @@
 """As called by dispatch_minejar"""
 import sys, os
 import subprocess
+import shutil
 
 try:
   TMPDIR = os.environ['TMPDIR']
@@ -39,15 +40,19 @@ def run_mine(tabfile=None, offset=None, minejar_file=None, work_dir=None):
   subprocess.call(cmd, shell=True)
 
   # Clean up.
-  for filename in TMPDIR:
+  for filename in os.listdir(TMPDIR):
     src = os.path.join(TMPDIR,filename)
     if "Results" in filename:
       dst = os.path.join(work_dir,filename)
-      os.rename(src, dst)
-      print "Moved %s to %s." % (src, dst)
+      print "Moving %s to %s." % (src, dst)
+      shutil.move(os.path.join(TMPDIR,src), dst)
     else:
-      os.remove(src)
-      print "Deleted %s." % src
+      print "Deleting %s." % src
+      try:
+        os.remove(src)
+      except OSError, e:
+        print "Error:", e
+
 
 
 if __name__ == "__main__":
