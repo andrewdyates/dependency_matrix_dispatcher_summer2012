@@ -24,7 +24,9 @@ def run_mine(tabfile=None, offset=None, minejar_file=None, work_dir=None):
   i = 0
   n_lines = 0
   while i < offset:
-    fp_in.next()
+    line = fp_in.next()
+    if line[0] not in ('\n', '#'):
+      i += 1
   for line in fp_in:
     fp_out.write(line)
     n_lines += 1
