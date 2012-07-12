@@ -9,12 +9,11 @@ import subprocess
 import shutil
 import datetime
 
-CMD = "python %(scriptfile) tabfile=%(tabfile)s offset=%(offset)d"
 WORK_DIR = "/fs/lustre/osu6683"
 MINEJAR_FILE = "/fs/lustre/osu6683/MINE.jar"
 #TMP_DIR = os.environ['TMPDIR']
 
-BATCH_CMD = "python %(script_path)s/batch_minejar.py tabfile=%(tabfile)s offset=%(offset)d minejar_file=%(minejar_file)s work_dir=%(work_dir) >> %(stdout_fname)s 2>> %(stderr_fname)s"
+BATCH_CMD = "python %(script_path)s/batch_minejar.py tabfile=%(tabfile)s offset=%(offset)d minejar_file=%(minejar_file)s work_dir=%(work_dir)s >> %(stdout_fname)s 2>> %(stderr_fname)s"
 
 QSUB_TEMPLATE = \
 """#PBS -N %(jobname)s
@@ -65,7 +64,7 @@ def dispatch(tabfile=None, n_nodes=2, n_ppn=12, walltime='6:00:00', \
   offset = start_offset
   while offset < n:
   #    BATCH_CMD = "python %(script_path)s/batch_minejar.py tabfile=%(tabfile)s offset=%(offset)d minejar_file=%(minejar_file)s work_dir=%(work_dir) >> %(stdout_fname)s 2>> %(stderr_fname)s"
-    cmd = CMD % {
+    cmd = BATCH_CMD % {
       'script_path': script_path,
       'tabfile': work_tabfile,
       'offset': offset, 
