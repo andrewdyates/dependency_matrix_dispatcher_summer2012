@@ -27,7 +27,7 @@ source .bash_profile
 mpiexec parallel-command-processor %(dispatch_script)s
 """
 
-def main(tabfile=None, n_nodes=2, n_ppn=12, walltime='6:00:00', \
+def dispatch(tabfile=None, n_nodes=2, n_ppn=12, walltime='6:00:00', \
          work_dir=WORK_DIR, minejar_file=MINEJAR_FILE, dry=False, start_offset=0, \
          jobname=None, out_dir=None):
   """Create parallel-command-processor script and start paralell job.
@@ -86,4 +86,4 @@ def main(tabfile=None, n_nodes=2, n_ppn=12, walltime='6:00:00', \
 
   
 if __name__ == "__main__":
-  main(**dict([s.split('=') for s in sys.argv[1:]]))
+  dispatch(**dict([s.split('=') for s in sys.argv[1:]]))
