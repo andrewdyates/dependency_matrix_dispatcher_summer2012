@@ -33,8 +33,9 @@ def dispatch(tabfile=None, n_nodes=2, n_ppn=12, walltime='6:00:00', \
   """Create parallel-command-processor script and start paralell job.
   """
   assert tabfile and jobname and out_dir
-  
   n_nodes, n_ppn, start_offset = map(int, (n_nodes, n_ppn, start_offset))
+  if type(dry) == str and dry.lower() in ('false', 'f', 'none', ''):
+    dry=False
 
   # Copy tabfile to WORK_DIR.
   tab_basename = os.path.basename(tabfile)

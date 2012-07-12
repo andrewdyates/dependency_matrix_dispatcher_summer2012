@@ -8,14 +8,10 @@ TMPDIR = os.environ['TMPDIR']
 
 MINEJAR_CMD = "java -jar %(minejar_file)s %(tabfile)s 0"
 
-def run_mine(script_path=None, tabfile=None, offset=None, minejar_file=None, work_dir=None, dry=False):
+def run_mine(script_path=None, tabfile=None, offset=None, minejar_file=None, work_dir=None):
   """ """
   assert None not in (script_path, tabfile, offset, minejar_file, work_dir)
   offset = int(offset)
-  if type(dry) == str and dry.lower() in ('false', 'f', 'none', ''):
-    dry=False
-  else:
-    dry= True
 
   # Copy tabfile to tmpdir from offset.
   tab_tmpfile = os.path.join(TMPDIR, "%s_%d.tab" % (tabfile.rpartition('.')[0], offset))
