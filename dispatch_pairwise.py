@@ -12,7 +12,7 @@ import shutil
 
 BATCH_CMD = "time python %(script_path)s/batch_pairwise.py npyfile=%(npyfile)s offset=%(offset)d k=%(k)d work_dir=%(work_dir)s function=%(function)s n=%(n)d >> %(stdout_fname)s 2>> %(stderr_fname)s"
 
-def dispatch_pairwise(tabfile=None, outdir=WORK_DIR, function=None, k=200000, dry=False, start_offset=0, work_dir=WORK_DIR, jobname=None, n_nodes=2, n_ppn=12, walltime='6:00:00')
+def dispatch_pairwise(tabfile=None, outdir=WORK_DIR, function=None, k=200000, dry=False, start_offset=0, work_dir=WORK_DIR, jobname=None, n_nodes=2, n_ppn=12, walltime='6:00:00'):
   assert tabfile
   n_nodes, n_ppn, start_offset, k = map(int, (n_nodes, n_ppn, start_offset, k))
   assert k > 1 and start_offset >= 0 and n_nodes > 0 and n_ppn > 0
