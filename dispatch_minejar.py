@@ -12,7 +12,7 @@ from util import *
 MINEJAR_FILE = "/fs/lustre/osu6683/MINE.jar"
 #TMP_DIR = os.environ['TMPDIR']
 
-BATCH_CMD = "python %(script_path)s/batch_minejar.py tabfile=%(tabfile)s offset=%(offset)d minejar_file=%(minejar_file)s work_dir=%(work_dir)s >> %(stdout_fname)s 2>> %(stderr_fname)s"
+BATCH_CMD = "time python %(script_path)s/batch_minejar.py tabfile=%(tabfile)s offset=%(offset)d minejar_file=%(minejar_file)s work_dir=%(work_dir)s >> %(stdout_fname)s 2>> %(stderr_fname)s"
 
 def dispatch_minejar(tabfile=None, n_nodes=2, n_ppn=12, walltime='6:00:00', \
          work_dir=WORK_DIR, minejar_file=MINEJAR_FILE, dry=False, start_offset=0, \
