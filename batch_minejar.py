@@ -1,7 +1,11 @@
 #!/usr/bin/python
-"""As called by dispatch_minejar"""
+"""As called by dispatch_minejar
+
+python /nfs/01/osu6683/dependency_matrix_dispatcher/batch_minejar.py tabfile=/fs/lustre/osu6683/GSE15745.GPL6104.mRNA.normed.tab offset=22180 minejar_file=/fs/lustre/osu6683/MINE.jar work_dir=/fs/lustre/osu6683
+"""
 import sys, os
 import subprocess
+import shutil
 
 try:
   TMPDIR = os.environ['TMPDIR']
@@ -16,13 +20,17 @@ def run_mine(tabfile=None, offset=None, minejar_file=None, work_dir=None):
   offset = int(offset)
 
   # Copy tabfile to tmpdir from offset.
-  tab_tmpfile = os.path.join(TMPDIR, "%s_%d.tab" % (tabfile.rpartition('.')[0], offset))
+  tabfile_basename = os.path.basename(tabfile)
+  tab_tmpfile = os.path.join(TMPDIR, "%s_%d.tab" % \
+                               (tabfile_basename.rpartition('.')[0], offset))
   fp_in = open(tabfile, 'r')
   fp_out = open(tab_tmpfile, 'w')
   i = 0
   n_lines = 0
   while i < offset:
-    fp_in.next()
+    line = fp_in.next()
+    if line[0] not in ('\n', '#'):
+      i += 1
   for line in fp_in:
     fp_out.write(line)
     n_lines += 1
@@ -35,15 +43,19 @@ def run_mine(tabfile=None, offset=None, minejar_file=None, work_dir=None):
   subprocess.call(cmd, shell=True)
 
   # Clean up.
-  for filename in TMPDIR:
+  for filename in os.listdir(TMPDIR):
     src = os.path.join(TMPDIR,filename)
     if "Results" in filename:
       dst = os.path.join(work_dir,filename)
-      os.rename(src, dst)
-      print "Moved %s to %s." % (src, dst)
+      print "Moving %s to %s." % (src, dst)
+      shutil.move(os.path.join(TMPDIR,src), dst)
     else:
-      os.remove(src)
-      print "Deleted %s." % src
+      print "Deleting %s." % src
+      try:
+        os.remove(src)
+      except OSError, e:
+        print "Error:", e
+
 
 
 if __name__ == "__main__":
