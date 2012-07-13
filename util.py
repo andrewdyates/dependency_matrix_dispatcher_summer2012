@@ -36,6 +36,45 @@ FUNCTIONS = {
   }
 
 
+def move_numpy_to_workdir(work_dir, npy_fname):
+  work_npy_fname = os.path.join(work_dir, os.path.basename(npy_fname))
+  if not os.path.exists(work_npy_fname):
+    shutil.move(npy_fname, work_npy_fname)
+    print "Moved %s to %s." % (npy_fname, work_npy_fname)
+  return work_npy_fname
+
+def npy_varlist_from_tabfile(tabfile, outdir):
+  """Import tabfile into numpy matrix and variable list; save to disk.
+
+  Args:
+    tabfile: str of path to .tab input data file
+  Returns:
+    (str, int) of path to saved numpy object and number of rows in data matrix
+  """
+  varlist_fname = os.path.join(outdir, os.path.basename(tabfile) + ".varlist.txt")
+  npy_fname = os.path.join(outdir, "%s.npy" % tabfile)
+  if os.path.exists(varlist_fname) and os.path.exists(npy_fname):
+    print "Both %s and %s exist, do not recreate varlist and numpy masked matrix files." % \
+        (varlist_fname, npy_fname)
+    # load numpy matrix to get its size
+    n = np.size(ma.load(npy_fname), 0)
+  else:
+    # import tab
+    varlist = []
+    # M is masked matrix
+    print "Loading %s into masked numpy matrix and varlist..." % tabfile
+    M = np.genfromtxt(name_iter(open(tabfile), varlist), usemask=True, delimiter='\t')
+    n = np.size(M, 0) # number of rows (variables)
+    # save to file
+    print "Saving matrix and varlist..."
+    fp = open(varlist_fname, "w")
+    fp.write('\n'.join(varlist))
+    fp.close()
+    ma.dump(M, npy_fname)
+  return npy_fname, n
+  
+
+
 def make_dir(outdir):
   try:
     os.makedirs(outdir)

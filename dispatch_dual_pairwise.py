@@ -1,8 +1,8 @@
 #!/usr/bin/python
-"""Dispatch pairwise dependency computations.
+"""Dispatch pairwise dependency computations between two matrices.
 
 USE EXAMPLE:
-python dispatch_pairwise.py outdir=/fs/lustre/osu6683/gse15745 tabfile=$HOME/gse15745/GSE15745.GPL6104.mRNA.normed.tab dry=True
+python dispatch_pairwise.py outdir=/fs/lustre/osu6683/gse15745 tabfile_1=$HOME/gse15745/GSE15745.GPL6104.mRNA.normed.tab tabfile_2=$HOME/gse15745/GSE15745.GPL8178.miRNA.normed.tab dry=True
 """
 from util import *
 import sys
@@ -12,8 +12,8 @@ import shutil
 
 BATCH_CMD = "time python %(script_path)s/batch_pairwise.py npyfile=%(npyfile)s start=%(start)d end=%(end)d work_dir=%(work_dir)s function=%(function)s n=%(n)d >> %(stdout_fname)s 2>> %(stderr_fname)s"
 
-def dispatch_pairwise(tabfile=None, outdir=WORK_DIR, function=None, k=200000, dry=False, start_offset=0, work_dir=WORK_DIR, jobname=None, n_nodes=2, n_ppn=12, walltime='6:00:00'):
-  assert tabfile
+def dispatch_pairwise(tabfile_1=None, tabfile_2=None, outdir=WORK_DIR, function=None, k=200000, dry=False, start_offset=0, work_dir=WORK_DIR, jobname=None, n_nodes=2, n_ppn=12, walltime='6:00:00'):
+  assert tabfile_1, tabfile_2
   n_nodes, n_ppn, start_offset, k = map(int, (n_nodes, n_ppn, start_offset, k))
   assert k > 1 and start_offset >= 0 and n_nodes > 0 and n_ppn > 0
   if jobname is None: 
@@ -32,12 +32,13 @@ def dispatch_pairwise(tabfile=None, outdir=WORK_DIR, function=None, k=200000, dr
     make_dir(path)
     outdirs[function] = os.path.abspath(path)
 
-  # Convert .tab into npy matrix
-  npy_fname, n = npy_varlist_from_tabfile(tabfile, outdir)
+  npy_fname_1, n1 = npy_varlist_from_tabfile(tabfile_1, outdir)
+  npy_fname_2, n2 = npy_varlist_from_tabfile(tabfile_2, outdir)
 
-  # Move npy_fname to workdir
-  work_npy_fname = move_numpy_to_workdir(work_dir, npy_fname)
-  
+  # Move npy_fname to work_dir
+  work_npy_fname_1 = move_numpy_to_workdir(work_dir, npy_fname_1)
+  work_npy_fname_2 = move_numpy_to_workdir(work_dir, npy_fname_2)
+
   # dispatch jobs in a loop
   num_pairs = int(n * (n-1) / 2) # no diagonal: n choose 2
 
