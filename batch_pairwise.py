@@ -2,6 +2,7 @@
 from util import *
 import numpy.ma as ma
 from py_symmetric_matrix import *
+import sys
 
 #BATCH_CMD = "time python %(script_path)s/batch_pairwise.py npyfile=%(npyfile)s offset=%(offset)d k=%(k)d work_dir=%(work_dir)s function=%(function)s n=%(n)d >> %(stdout_fname)s 2>> %(stderr_fname)s"
 
@@ -10,8 +11,8 @@ REPORT_N = 1000
 def main(npyfile=None, offset=None, work_dir=None, function=None, n=None, start=None, end=None, batchname=None):
   assert npyfile, work_dir
   assert function in FUNCTIONS
-  n = int(n)
-  assert n > 0 and k > 0 and offset >= 0
+  n, start, end = map(int, (n, start, end))
+  assert n > 0 and start >= 0 and end > 0
   if batchname is None or batchname in ("None", "NONE", "none"):
     batchname = "%s_%s_%d_%d" % \
       (os.path.basename(npyfile), function, start, end)
@@ -33,13 +34,15 @@ def main(npyfile=None, offset=None, work_dir=None, function=None, n=None, start=
     if i % REPORT_N == 0:
       print "Generating pair %d (to %d) in %s..." % \
         (i, end-1, batchname)
-    x, y = inv_sym_idx(i, m)
+    x, y = inv_sym_idx(i, n)
     R[i] = f(M[x], M[y])
   print "Computed %d pairs for %s" % (end-start, batchname)
 
-  output_fname = os.path.join(work_dir, batchname+".txt")
+  output_fname = os.path.join(work_dir, batchname+".npy")
   print "Saving results %d through %d as %s. (zero-indexed)" % (start, end-1, output_fname)
   np.save(output_fname, R)
   print "Saved %s." % output_fname
   
   
+if __name__ == "__main__":
+  main(**dict([s.split('=') for s in sys.argv[1:]]))

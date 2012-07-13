@@ -2,7 +2,7 @@
 """Dispatch pairwise dependency computations.
 
 USE EXAMPLE:
-  python dispatch_pairwise.py outdir=/fs/lustre/osu6683/gse15745 tabfile=$HOME/gse15745/GSE15745.GPL6104.mRNA.normed.tab dry=True
+python dispatch_pairwise.py outdir=/fs/lustre/osu6683/gse15745 tabfile=$HOME/gse15745/GSE15745.GPL6104.mRNA.normed.tab dry=True
 """
 from util import *
 import sys
@@ -64,20 +64,12 @@ def dispatch_pairwise(tabfile=None, outdir=WORK_DIR, function=None, k=200000, dr
   # dispatch jobs in a loop
   num_pairs = int(n * (n-1) / 2) # no diagonal: n choose 2
 
-<<<<<<< HEAD
-=======
-  # Create new dispatch script file.o
-  dispatch_script_fname = make_script_name(work_dir, os.path.basename(npy_fname), "dispatch_pairwise")
-  print "Creating batch script '%s'..." % dispatch_script_fname
-  fp = open(dispatch_script_fname, 'w')
-
->>>>>>> d682e88fbe5ed4171eb6cf13ac16aba35796a70e
   # Write jobs to dispatch script in a list.
   t = tstamp()
   for function in all_functions:
     # Create new dispatch script per function
     dispatch_script_fname = \
-      make_script_name(work_dir, work_npy_fname, "dispatch_%s" % function)
+      make_script_name(work_dir, os.path.basename(work_npy_fname), "dispatch_%s" % function)
     print "Creating batch script '%s'..." % dispatch_script_fname
     fp = open(dispatch_script_fname, 'w')
     offset = start_offset
