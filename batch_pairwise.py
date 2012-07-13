@@ -8,7 +8,7 @@ import sys
 
 REPORT_N = 1000
 
-def main(npyfile=None, offset=None, work_dir=None, function=None, n=None, start=None, end=None, batchname=None):
+def main(npyfile=None, work_dir=None, function=None, n=None, start=None, end=None, batchname=None):
   assert npyfile, work_dir
   assert function in FUNCTIONS
   n, start, end = map(int, (n, start, end))
