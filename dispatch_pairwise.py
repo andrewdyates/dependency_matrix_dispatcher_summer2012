@@ -1,5 +1,5 @@
 #!/usr/bin/python
-"""
+"""Dispatch pairwise dependency computations.
 
 USE EXAMPLE:
   python dispatch_pairwise.py outdir=/fs/lustre/osu6683/gse15745 tabfile=$HOME/gse15745/GSE15745.GPL6104.mRNA.normed.tab dry=True
@@ -65,7 +65,7 @@ def dispatch_pairwise(tabfile=None, outdir=WORK_DIR, function=None, k=200000, dr
   num_pairs = int(n * (n-1) / 2) # no diagonal: n choose 2
 
   # Create new dispatch script file.o
-  dispatch_script_fname = make_script_name(work_dir, work_npy_fname, "dispatch_pairwise")
+  dispatch_script_fname = make_script_name(work_dir, os.path.basename(npy_fname), "dispatch_pairwise")
   print "Creating batch script '%s'..." % dispatch_script_fname
   fp = open(dispatch_script_fname, 'w')
 
@@ -84,6 +84,7 @@ def dispatch_pairwise(tabfile=None, outdir=WORK_DIR, function=None, k=200000, dr
         'work_dir': outdirs[function],
         'stdout_fname': os.path.join(work_dir, "log_%s_%s_%s.out" % (jobname, t, function)),
         'stderr_fname': os.path.join(work_dir, "log_%s_%s_%s.err" % (jobname, t, function)),
+        'function': function,
       }
       fp.write(cmd); fp.write('\n')
     offset += k
