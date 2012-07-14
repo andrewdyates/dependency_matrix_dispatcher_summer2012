@@ -64,7 +64,8 @@ def npy_varlist_from_tabfile(tabfile, outdir):
     print "Both %s and %s exist, do not recreate varlist and numpy masked matrix files." % \
         (varlist_fname, npy_fname)
     # load numpy matrix to get its size
-    n = np.size(ma.load(npy_fname), 0)
+    M = ma.load(npy_fname)
+    n = np.size(M, 0)
   else:
     # import tab
     varlist = []
