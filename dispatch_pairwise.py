@@ -7,6 +7,7 @@ python dispatch_pairwise.py outdir=/fs/lustre/osu6683/gse15745 tabfile=$HOME/gse
 from util import *
 import sys
 import shutil
+import math
 
 
 BATCH_CMD = "time python %(script_path)s/batch_pairwise.py npyfile=%(npyfile)s start=%(start)d end=%(end)d work_dir=%(work_dir)s function=%(function)s n=%(n)d >> %(stdout_fname)s 2>> %(stderr_fname)s"
@@ -75,7 +76,7 @@ def dispatch_pairwise(tabfile=None, outdir=WORK_DIR, function=None, k=100000, dr
     num_jobs = math.ceil(num_pairs / k)
     # Submit job script.
     qsub_script = QSUB_TEMPLATE % {'jobname': jobname, 'n_nodes': n_nodes, 'n_ppn': n_ppn, 'walltime': walltime, \
-      'dispatch_script': dispatch_script_fname, 'num_pairs': num_pairs, 'k', k, 'num_jobs': num_jobs, 'function': function}
+      'dispatch_script': dispatch_script_fname, 'num_pairs': num_pairs, 'k': k, 'num_jobs': num_jobs, 'function': function}
     print qsub_script
     if not dry:
       fork_qsub_submit(qsub_script)
