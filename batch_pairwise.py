@@ -17,6 +17,12 @@ def main(npyfile=None, work_dir=None, function=None, n=None, start=None, end=Non
     batchname = "%s_%s_%d_%d" % \
       (os.path.basename(npyfile), function, start, end)
 
+  # Do not recreate existing files.
+  output_fname = os.path.join(work_dir, batchname+".npy")
+  if os.path.exists(output_fname):
+    print "%s already exists. Exiting..." % output_fname
+    return 1
+
   if start is None:
     start = 0
   else:
