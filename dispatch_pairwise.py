@@ -33,7 +33,8 @@ def dispatch_pairwise(tabfile=None, outdir=WORK_DIR, function=None, k=200000, dr
     outdirs[function] = os.path.abspath(path)
 
   # Convert .tab into npy matrix
-  npy_fname, n = npy_varlist_from_tabfile(tabfile, outdir)
+  npy_fname, n, M = npy_varlist_from_tabfile(tabfile, outdir)
+  del M
 
   # Move npy_fname to workdir
   work_npy_fname = move_numpy_to_workdir(work_dir, npy_fname)

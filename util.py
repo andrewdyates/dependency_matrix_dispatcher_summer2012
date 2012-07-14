@@ -6,7 +6,7 @@ import os
 import errno
 import numpy.ma as ma
 from scipy.stats import mstats
-
+import shutil
 
 WORK_DIR = "/fs/lustre/osu6683"
 QSUB_TEMPLATE = \
@@ -46,7 +46,7 @@ def move_numpy_to_workdir(work_dir, npy_fname):
 def read_samples(tabfile_1_coltitles):
   sample_titles_1 = [s for s in open(tabfile_1_coltitles).next().strip('\n').split('\t')]
   sample_titles_set_1 = set(sample_titles_1)
-  idx_1 = dict([(i, s) for s in enumerate(sample_titles_1)])
+  idx_1 = dict([(i, s) for i, s in enumerate(sample_titles_1)])
   return sample_titles_1, sample_titles_set_1, idx_1
 
 

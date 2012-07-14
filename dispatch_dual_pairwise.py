@@ -16,7 +16,7 @@ def dispatch_pairwise(tabfile_1=None, tabfile_2=None, tabfile_1_coltitles=None, 
   n_nodes, n_ppn, start_offset, k = map(int, (n_nodes, n_ppn, start_offset, k))
   assert k > 1 and start_offset >= 0 and n_nodes > 0 and n_ppn > 0
   if jobname is None: 
-    jobname = os.path.basename(tabfile)
+    jobname = os.path.basename("%s_vs_%s" % (tabfile_1, tabfile_2))
   
   if function is None:
     all_functions = FUNCTIONS
@@ -35,7 +35,7 @@ def dispatch_pairwise(tabfile_1=None, tabfile_2=None, tabfile_1_coltitles=None, 
   npy_fname_2, n2, M2 = npy_varlist_from_tabfile(tabfile_2, outdir)
   # let the smaller matrix be matrix 1
   if n1 > n2:
-    npy_fname_1, npy_fname_2 = npy_fname_2, npy_fname_2
+    npy_fname_1, npy_fname_2 = npy_fname_2, npy_fname_1
     tabfile_1_coltitles, tabfile_2_coltitles = tabfile_2_coltitles, tabfile_1_coltitles
     n1, n2 = n2, n1
     M1, M2 = M2, M1
@@ -47,7 +47,7 @@ def dispatch_pairwise(tabfile_1=None, tabfile_2=None, tabfile_1_coltitles=None, 
   cols = []
   for s in titles1:
     if s in set2:
-      cols.append(idx1[s], idx2[s])
+      cols.append((idx1[s], idx2[s]))
   print "Aligned %d cols from %s and %d cols from %s to %d shared columns." % \
     (len(titles1), tabfile_1_coltitles, len(titles2), tabfile_2_coltitles, len(cols))
 
@@ -58,24 +58,16 @@ def dispatch_pairwise(tabfile_1=None, tabfile_2=None, tabfile_1_coltitles=None, 
   work_npy_fname_1 = move_numpy_to_workdir(work_dir, npy_fname_1)
   work_npy_fname_2 = move_numpy_to_workdir(work_dir, npy_fname_2)
 
-  # dispatch jobs in a loop
-  num_pairs = int(n * (n-1) / 2) # no diagonal: n choose 2
-
   # Write jobs to dispatch script in a list.
   t = tstamp()
   for function in all_functions:
     # Create new dispatch script per function
     dispatch_script_fname = \
-      make_script_name(work_dir, os.path.basename(work_npy_fname), "dispatch_%s" % function)
+      make_script_name(work_dir, os.path.basename(work_npy_fname_1), "dispatch_%s" % function)
     print "Creating batch script '%s'..." % dispatch_script_fname
     fp = open(dispatch_script_fname, 'w')
     offset = start_offset
-    for offset in xrange(
-    while offset < num_pairs:
-      start = offset
-      end = offset + k
-      if end > num_pairs:
-        end = num_pairs
+    for offset in xrange(n1):
 # BATCH_CMD = "time python %(script_path)s/batch_dual_pairwise.py npyfile_1=%(npyfile_1)s npyfile_2=%(npyfile_2)s offset=%(offset)d work_dir=%(work_dir)s function=%(function)s >> %(stdout_fname)s 2>> %(stderr_fname)s"
       cmd = BATCH_CMD % {
         'script_path': os.path.dirname(os.path.realpath(__file__)),
@@ -88,7 +80,6 @@ def dispatch_pairwise(tabfile_1=None, tabfile_2=None, tabfile_1_coltitles=None, 
         'function': function,
       }
       fp.write(cmd); fp.write('\n')
-      offset += k
     fp.close()
     # Submit job script.
     qsub_script = QSUB_TEMPLATE % {'jobname': jobname, 'n_nodes': n_nodes, 'n_ppn': n_ppn, 'walltime': walltime, 'dispatch_script': dispatch_script_fname}
