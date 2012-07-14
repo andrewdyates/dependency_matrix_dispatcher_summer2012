@@ -43,6 +43,13 @@ def move_numpy_to_workdir(work_dir, npy_fname):
     print "Moved %s to %s." % (npy_fname, work_npy_fname)
   return work_npy_fname
 
+def read_samples(tabfile_1_coltitles):
+  sample_titles_1 = [s for s in open(tabfile_1_coltitles).next().strip('\n').split('\t')]
+  sample_titles_set_1 = set(sample_titles_1)
+  idx_1 = dict([(i, s) for s in enumerate(sample_titles_1)])
+  return sample_titles_1, sample_titles_set_1, idx_1
+
+
 def npy_varlist_from_tabfile(tabfile, outdir):
   """Import tabfile into numpy matrix and variable list; save to disk.
 
@@ -71,7 +78,7 @@ def npy_varlist_from_tabfile(tabfile, outdir):
     fp.write('\n'.join(varlist))
     fp.close()
     ma.dump(M, npy_fname)
-  return npy_fname, n
+  return npy_fname, n, M
   
 
 
