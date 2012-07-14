@@ -9,7 +9,6 @@ import sys
 import shutil
 
 
-
 BATCH_CMD = "time python %(script_path)s/batch_pairwise.py npyfile=%(npyfile)s start=%(start)d end=%(end)d work_dir=%(work_dir)s function=%(function)s n=%(n)d >> %(stdout_fname)s 2>> %(stderr_fname)s"
 
 def dispatch_pairwise(tabfile=None, outdir=WORK_DIR, function=None, k=100000, dry=False, start_offset=0, work_dir=WORK_DIR, jobname=None, n_nodes=6, n_ppn=12, walltime='8:00:00'):
@@ -73,8 +72,10 @@ def dispatch_pairwise(tabfile=None, outdir=WORK_DIR, function=None, k=100000, dr
       fp.write(cmd); fp.write('\n')
       offset += k
     fp.close()
+    num_jobs = math.ceil(num_pairs / k)
     # Submit job script.
-    qsub_script = QSUB_TEMPLATE % {'jobname': jobname, 'n_nodes': n_nodes, 'n_ppn': n_ppn, 'walltime': walltime, 'dispatch_script': dispatch_script_fname}
+    qsub_script = QSUB_TEMPLATE % {'jobname': jobname, 'n_nodes': n_nodes, 'n_ppn': n_ppn, 'walltime': walltime, \
+      'dispatch_script': dispatch_script_fname, 'num_pairs': num_pairs, 'k', k, 'num_jobs': num_jobs, 'function': function}
     print qsub_script
     if not dry:
       fork_qsub_submit(qsub_script)

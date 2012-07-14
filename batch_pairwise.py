@@ -6,9 +6,10 @@ import sys
 
 #BATCH_CMD = "time python %(script_path)s/batch_pairwise.py npyfile=%(npyfile)s offset=%(offset)d k=%(k)d work_dir=%(work_dir)s function=%(function)s n=%(n)d >> %(stdout_fname)s 2>> %(stderr_fname)s"
 
-REPORT_N = 1000
+REPORT_N = 50000
 
 def main(npyfile=None, work_dir=None, function=None, n=None, start=None, end=None, batchname=None):
+  
   assert npyfile, work_dir
   assert function in FUNCTIONS
   n, start, end = map(int, (n, start, end))
