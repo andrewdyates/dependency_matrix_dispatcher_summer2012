@@ -7,6 +7,7 @@ python dispatch_pairwise.py outdir=/fs/lustre/osu6683/gse15745 tabfile_1=$HOME/g
 from util import *
 import sys
 import shutil
+import numpy.ma as ma
 
 
 BATCH_CMD = "time python %(script_path)s/batch_dual_pairwise.py npyfile_1=%(npyfile_1)s npyfile_2=%(npyfile_2)s offset=%(offset)d work_dir=%(work_dir)s function=%(function)s >> %(stdout_fname)s 2>> %(stderr_fname)s"
@@ -16,7 +17,9 @@ def dispatch_pairwise(tabfile_1=None, tabfile_2=None, tabfile_1_coltitles=None, 
   n_nodes, n_ppn, start_offset, k = map(int, (n_nodes, n_ppn, start_offset, k))
   assert k > 1 and start_offset >= 0 and n_nodes > 0 and n_ppn > 0
   if jobname is None: 
-    jobname = os.path.basename("%s_vs_%s" % (tabfile_1, tabfile_2))
+    jobname_base = os.path.basename("%s_vs_%s" % (tabfile_1, tabfile_2))
+  else:
+    jobname_base = jobname
   
   if function is None:
     all_functions = FUNCTIONS
@@ -33,6 +36,8 @@ def dispatch_pairwise(tabfile_1=None, tabfile_2=None, tabfile_1_coltitles=None, 
 
   npy_fname_1, n1, M1 = npy_varlist_from_tabfile(tabfile_1, outdir)
   npy_fname_2, n2, M2 = npy_varlist_from_tabfile(tabfile_2, outdir)
+  if M1 is None:
+    M1 = ma.load("npy_fname_1")
   # let the smaller matrix be matrix 1
   if n1 > n2:
     npy_fname_1, npy_fname_2 = npy_fname_2, npy_fname_1
@@ -61,6 +66,7 @@ def dispatch_pairwise(tabfile_1=None, tabfile_2=None, tabfile_1_coltitles=None, 
   # Write jobs to dispatch script in a list.
   t = tstamp()
   for function in all_functions:
+    jobname = "%s_%s" % (jobname_base, function)
     # Create new dispatch script per function
     dispatch_script_fname = \
       make_script_name(work_dir, os.path.basename(work_npy_fname_1), "dispatch_%s" % function)

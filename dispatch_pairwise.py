@@ -17,7 +17,9 @@ def dispatch_pairwise(tabfile=None, outdir=WORK_DIR, function=None, k=200000, dr
   n_nodes, n_ppn, start_offset, k = map(int, (n_nodes, n_ppn, start_offset, k))
   assert k > 1 and start_offset >= 0 and n_nodes > 0 and n_ppn > 0
   if jobname is None: 
-    jobname = os.path.basename(tabfile)
+    jobname_base = os.path.basename(tabfile)
+  else:
+    jobname_base = jobname
   
   if function is None:
     all_functions = FUNCTIONS
@@ -45,6 +47,7 @@ def dispatch_pairwise(tabfile=None, outdir=WORK_DIR, function=None, k=200000, dr
   # Write jobs to dispatch script in a list.
   t = tstamp()
   for function in all_functions:
+    jobname = "%s_%s" % (jobname_base, function)
     # Create new dispatch script per function
     dispatch_script_fname = \
       make_script_name(work_dir, os.path.basename(work_npy_fname), "dispatch_%s" % function)
