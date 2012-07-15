@@ -2,6 +2,7 @@
 import subprocess
 import datetime
 from dcor_cpy import *
+#from dcor import *
 import os
 import errno
 from numpy import ma
