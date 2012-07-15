@@ -33,6 +33,7 @@ def main(npyfile=None, work_dir=None, function=None, n=None, start=None, end=Non
   else:
     end = int(end)
 
+  print "Loading %s..." % npyfile
   M = ma.load(npyfile)
   f = FUNCTIONS[function]
   R = np.zeros(end-start)
