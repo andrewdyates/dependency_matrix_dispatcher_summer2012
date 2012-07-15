@@ -8,6 +8,8 @@ import numpy.ma as ma
 from scipy.stats import mstats
 import shutil
 
+MISSING_VALUES = ",".join(["nan", "None", "N/A", "none", "NaN"])
+
 WORK_DIR = "/fs/lustre/osu6683"
 QSUB_TEMPLATE = \
 """#PBS -N %(jobname)s
@@ -74,7 +76,7 @@ def npy_varlist_from_tabfile(tabfile, outdir):
     varlist = []
     # M is masked matrix
     print "Loading %s into masked numpy matrix and varlist..." % tabfile
-    M = np.genfromtxt(name_iter(open(tabfile), varlist), usemask=True, delimiter='\t')
+    M = np.genfromtxt(name_iter(open(tabfile), varlist), usemask=True, delimiter='\t', missing_values=MISSING_VALUES)
     n = np.size(M, 0) # number of rows (variables)
     # save to file
     print "Saving matrix and varlist..."
@@ -82,6 +84,9 @@ def npy_varlist_from_tabfile(tabfile, outdir):
     fp.write('\n'.join(varlist))
     fp.close()
     ma.dump(M, npy_fname)
+    
+  n_nans = np.count_nonzero(np.isnan(M))
+  assert n_nans == 0, "%d 'nan's exists in matrix %s!" % (n_nans, npy_fname)
   return npy_fname, n, M
   
 
