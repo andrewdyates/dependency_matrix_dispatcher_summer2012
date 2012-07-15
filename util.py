@@ -110,7 +110,7 @@ def is_dry(dry):
   if type(dry) == str and dry.lower() in ('false', 'f', 'none', ''):
     return False
   else:
-    return True
+    return bool(dry)
 
 def count_tab_rows(tabfile):
   x = len([None for f in open(tabfile) if f[0] not in ('\n', '#')])
