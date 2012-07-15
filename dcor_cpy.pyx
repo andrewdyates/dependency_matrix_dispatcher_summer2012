@@ -44,6 +44,12 @@ import numpy as np
 cimport numpy as np
 import cython
 
+# does this help?
+import pyximport
+pyximport.install(setup_args={'include_dirs':[np.get_include()]})
+# -----
+
+
 ctypedef np.double_t DTYPE_t
 
 #purely for speed reasons
