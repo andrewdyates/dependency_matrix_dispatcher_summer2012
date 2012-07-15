@@ -75,7 +75,7 @@ def npy_varlist_from_tabfile(tabfile, outdir):
     varlist = []
     # M is masked matrix
     print "Loading %s into masked numpy matrix and varlist..." % tabfile
-    M = np.genfromtxt(name_iter(open(tabfile), varlist), usemask=True, delimiter='\t', missing_values=MISSING_VALUES)
+    M = np.genfromtxt(name_iter(open(tabfile), varlist), usemask=True, delimiter='\t', missing_values=MISSING_VALUES, dtype=np.float)
     n = np.size(M, 0) # number of rows (variables)
     # save to file
     print "Saving matrix and varlist..."
