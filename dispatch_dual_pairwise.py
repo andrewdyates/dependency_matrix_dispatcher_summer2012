@@ -18,7 +18,7 @@ def dispatch_dual_pairwise(tabfile_1=None, tabfile_2=None, tabfile_1_coltitles=N
   n_nodes, n_ppn, start_offset, k = map(int, (n_nodes, n_ppn, start_offset, k))
   assert k > 1 and start_offset >= 0 and n_nodes > 0 and n_ppn > 0
   if jobname is None: 
-    jobname_base = os.path.basename("%s_vs_%s" % (tabfile_1, tabfile_2))
+    jobname_base = "%s_vs_%s" % (os.path.basename(tabfile_1), os.path.basename(tabfile_2))
   else:
     jobname_base = jobname
   

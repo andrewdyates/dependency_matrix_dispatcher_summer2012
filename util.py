@@ -35,8 +35,8 @@ def euclidean(x,y):
 FUNCTIONS = {
   'pearson': lambda x, y: mstats.pearsonr(x,y)[0],
   'spearman': lambda x, y: mstats.spearmanr(x,y)[0],
-  'euclidean': euclidean,
-  'kendalltau': lambda x,y: mstats.kendalltau(x,y)[0],
+#  'euclidean': euclidean,
+#  'kendalltau': lambda x,y: mstats.kendalltau(x,y)[0],
   'dcor': lambda x,y: dcov_all(x,y)[1],
   }
 
