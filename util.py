@@ -4,7 +4,7 @@ import datetime
 from dcor import *
 import os
 import errno
-import numpy.ma as ma
+from numpy import ma
 from scipy.stats import mstats
 import shutil
 
@@ -84,7 +84,7 @@ def npy_varlist_from_tabfile(tabfile, outdir):
     fp.close()
     ma.dump(M, npy_fname)
     
-  n_nans = np.count_nonzero(np.isnan(M))
+  n_nans = np.count_nonzero(np.isnan(M.compressed()))
   assert n_nans == 0, "%d 'nan's exists in matrix %s!" % (n_nans, npy_fname)
   return npy_fname, n, M
   
