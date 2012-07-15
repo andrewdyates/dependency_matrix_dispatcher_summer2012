@@ -4,7 +4,8 @@ import numpy as np
 FROM:
 http://jpktd.blogspot.com/2012/06/non-linear-dependence-measures-distance.html
 
-NOTE: author's R implementation uses square root even though Joepy does not.
+Optimized using cython
+note: removed square root 
 """
 
 def dist(x, y):
