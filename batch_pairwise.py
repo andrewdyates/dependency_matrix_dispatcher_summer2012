@@ -1,7 +1,7 @@
 #!/usr/bin/python
 from util import *
 import numpy.ma as ma
-from py_symmetric_matrix import *
+from py_symmetric_matrix.cpy import *
 import sys
 
 #BATCH_CMD = "time python %(script_path)s/batch_pairwise.py npyfile=%(npyfile)s offset=%(offset)d k=%(k)d work_dir=%(work_dir)s function=%(function)s n=%(n)d >> %(stdout_fname)s 2>> %(stderr_fname)s"
@@ -20,9 +20,9 @@ def main(npyfile=None, work_dir=None, function=None, n=None, start=None, end=Non
 
   # Do not recreate existing files.
   output_fname = os.path.join(work_dir, batchname+".npy")
-  if os.path.exists(output_fname):
-    print "%s already exists. Exiting..." % output_fname
-    return 1
+#  if os.path.exists(output_fname):
+#    print "%s already exists. Exiting..." % output_fname
+#    return 1
 
   if start is None:
     start = 0
@@ -43,7 +43,9 @@ def main(npyfile=None, work_dir=None, function=None, n=None, start=None, end=Non
       print "Generating pair %d (to %d) in %s..." % \
         (i, end-1, batchname)
     x, y = inv_sym_idx(i, n)
-    R[i] = f(M[x], M[y])
+    v = f(M[x], M[y])
+    R[i] = v
+    print v
   print "Computed %d pairs for %s" % (end-start, batchname)
 
   output_fname = os.path.join(work_dir, batchname+".npy")

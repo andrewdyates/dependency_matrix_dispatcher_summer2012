@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import subprocess
 import datetime
-from dcor import *
+from dcor_cpy import *
 import os
 import errno
 from numpy import ma
@@ -36,7 +36,7 @@ FUNCTIONS = {
   'spearman': lambda x, y: mstats.spearmanr(x,y)[0],
   'euclidean': euclidean,
   'kendalltau': lambda x,y: mstats.kendalltau(x,y)[0],
-  'dcor': dcor,
+  'dcor': lambda x,y: dcov_all(x,y)[1],
   }
 
 
