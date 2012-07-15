@@ -22,7 +22,7 @@ QSUB_TEMPLATE = \
 set -x
 cd /nfs/01/osu6683/
 source .bash_profile
-echo "Dispatching %(num_jobs)d jobs of %(k)d pairs each of %(num_pairs)s total."
+echo "Dispatching %(num_jobs)d jobs each with %(k)d pairs from %(num_pairs)s total pairs."
 echo "Function: %(function)s"
 mpiexec parallel-command-processor %(dispatch_script)s
 """

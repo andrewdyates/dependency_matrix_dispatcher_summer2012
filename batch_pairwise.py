@@ -20,9 +20,9 @@ def main(npyfile=None, work_dir=None, function=None, n=None, start=None, end=Non
 
   # Do not recreate existing files.
   output_fname = os.path.join(work_dir, batchname+".npy")
-#  if os.path.exists(output_fname):
-#    print "%s already exists. Exiting..." % output_fname
-#    return 1
+  if os.path.exists(output_fname):
+    print "%s already exists. Exiting..." % output_fname
+    return 1
 
   if start is None:
     start = 0
@@ -43,9 +43,7 @@ def main(npyfile=None, work_dir=None, function=None, n=None, start=None, end=Non
       print "Generating pair %d (to %d) in %s..." % \
         (i, end-1, batchname)
     x, y = inv_sym_idx(i, n)
-    v = f(M[x], M[y])
-    R[i] = v
-    print v
+    R[i] = f(M[x], M[y])
   print "Computed %d pairs for %s" % (end-start, batchname)
 
   output_fname = os.path.join(work_dir, batchname+".npy")
