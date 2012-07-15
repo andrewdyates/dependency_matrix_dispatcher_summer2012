@@ -49,9 +49,10 @@ def move_numpy_to_workdir(work_dir, npy_fname):
   return work_npy_fname
 
 def read_samples(tabfile_1_coltitles):
-  sample_titles_1 = [s for s in open(tabfile_1_coltitles).next().strip('\n').split('\t')]
+  sample_titles_1 = [s for s in open(tabfile_1_coltitles).next().strip('\n').split(',')]
+  assert len(sample_titles_1) > 1, "delimit sample titles with commas"
   sample_titles_set_1 = set(sample_titles_1)
-  idx_1 = dict([(i, s) for i, s in enumerate(sample_titles_1)])
+  idx_1 = dict([(s, i) for i, s in enumerate(sample_titles_1)])
   return sample_titles_1, sample_titles_set_1, idx_1
 
 
