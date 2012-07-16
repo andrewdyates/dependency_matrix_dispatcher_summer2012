@@ -43,7 +43,11 @@ def main(npyfile=None, work_dir=None, function=None, n=None, start=None, end=Non
       print "Generating pair %d (to %d) in %s..." % \
         (i, end-1, batchname)
     x, y = inv_sym_idx(i, n)
-    R[i] = f(M[x], M[y])
+    try:
+      R[i] = f(M[x], M[y])
+    except IndexError:
+      print "WARNING! INDEX ERROR! i %d, x %d, y %d, n %d" %(i,x,y,n)
+      raise
   print "Computed %d pairs for %s" % (end-start, batchname)
 
   output_fname = os.path.join(work_dir, batchname+".npy")

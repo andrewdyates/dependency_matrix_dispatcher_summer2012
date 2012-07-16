@@ -11,7 +11,7 @@ import shutil
 import numpy.ma as ma
 
 
-BATCH_CMD = "time python %(script_path)s/batch_dual_pairwise.py npyfile_1=%(npyfile_1)s npyfile_2=%(npyfile_2)s offset=%(offset)d work_dir=%(work_dir)s function=%(function)s >> %(stdout_fname)s 2>> %(stderr_fname)s"
+BATCH_CMD = "time python %(script_path)s/batch_dual_pairwise.py npyfile_1=%(npyfile_1)s npyfile_2=%(npyfile_2)s offset=%(offset)d work_dir=%(work_dir)s function=%(function)s > %(stdout_fname)s 2> %(stderr_fname)s"
 
 def dispatch_dual_pairwise(tabfile_1=None, tabfile_2=None, tabfile_1_coltitles=None, tabfile_2_coltitles=None, outdir=WORK_DIR, function=None, k=200000, dry=False, start_offset=0, work_dir=WORK_DIR, jobname=None, n_nodes=6, n_ppn=12, walltime='12:00:00'):
   assert tabfile_1 and tabfile_2 and tabfile_1_coltitles and tabfile_2_coltitles
@@ -106,8 +106,8 @@ def dispatch_dual_pairwise(tabfile_1=None, tabfile_2=None, tabfile_1_coltitles=N
         'npyfile_2': npy_aligned_fname_2,
         'offset': offset,
         'work_dir': outdirs[function],
-        'stdout_fname': os.path.join(work_dir, "log_%s_%s_%s.out" % (jobname, t, function)),
-        'stderr_fname': os.path.join(work_dir, "log_%s_%s_%s.err" % (jobname, t, function)),
+        'stdout_fname': os.path.join(work_dir, "log_%s_%s_%s_%d_%d.out" % (jobname, t, function, start, end)),
+        'stderr_fname': os.path.join(work_dir, "log_%s_%s_%s_%d_%d.err" % (jobname, t, function, start, end)),
         'function': function,
       }
       fp.write(cmd); fp.write('\n')

@@ -10,7 +10,7 @@ import shutil
 import math
 
 
-BATCH_CMD = "time python %(script_path)s/batch_pairwise.py npyfile=%(npyfile)s start=%(start)d end=%(end)d work_dir=%(work_dir)s function=%(function)s n=%(n)d >> %(stdout_fname)s 2>> %(stderr_fname)s"
+BATCH_CMD = "time python %(script_path)s/batch_pairwise.py npyfile=%(npyfile)s start=%(start)d end=%(end)d work_dir=%(work_dir)s function=%(function)s n=%(n)d > %(stdout_fname)s 2> %(stderr_fname)s"
 
 def dispatch_pairwise(tabfile=None, outdir=WORK_DIR, function=None, k=200000, dry=False, start_offset=0, work_dir=WORK_DIR, jobname=None, n_nodes=6, n_ppn=12, walltime='8:00:00'):
   assert tabfile
@@ -66,8 +66,8 @@ def dispatch_pairwise(tabfile=None, outdir=WORK_DIR, function=None, k=200000, dr
         'end': end,
         'n': n,
         'work_dir': outdirs[function],
-        'stdout_fname': os.path.join(work_dir, "log_%s_%s_%s.out" % (jobname, t, function)),
-        'stderr_fname': os.path.join(work_dir, "log_%s_%s_%s.err" % (jobname, t, function)),
+        'stdout_fname': os.path.join(work_dir, "log_%s_%s_%s_%d_%d.out" % (jobname, t, function, start, end)),
+        'stderr_fname': os.path.join(work_dir, "log_%s_%s_%s_%d_%d.err" % (jobname, t, function, start, end)),
         'function': function,
       }
       fp.write(cmd); fp.write('\n')

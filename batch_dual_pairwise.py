@@ -34,7 +34,11 @@ def main(npyfile_1=None, npyfile_2=None, offset=None, work_dir=None, function=No
     if i % REPORT_N == 0:
       print "Generating pair %d (to %d) in %s..." % \
         (i, n, batchname)
-    R[i] = f(M1[offset], M2[i])
+    try:
+      R[i] = f(M[x], M[y])
+    except IndexError:
+      print "WARNING! INDEX ERROR! i %d, x %d, y %d, n %d" %(i,x,y,n)
+      raise
   print "Computed %d pairs for %s using %s." % (n, batchname, function)
 
   output_fname = os.path.join(work_dir, batchname+".npy")
