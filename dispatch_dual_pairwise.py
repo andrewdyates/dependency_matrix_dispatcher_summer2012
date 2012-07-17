@@ -106,8 +106,8 @@ def dispatch_dual_pairwise(tabfile_1=None, tabfile_2=None, tabfile_1_coltitles=N
         'npyfile_2': npy_aligned_fname_2,
         'offset': offset,
         'work_dir': outdirs[function],
-        'stdout_fname': os.path.join(work_dir, "log_%s_%s_%s_%d_%d.out" % (jobname, t, function, start, end)),
-        'stderr_fname': os.path.join(work_dir, "log_%s_%s_%s_%d_%d.err" % (jobname, t, function, start, end)),
+        'stdout_fname': os.path.join(outdirs[function], "log_%s_%s_%s_%d.out" % (jobname, t, function, offset)),
+        'stderr_fname': os.path.join(outdirs[function], "log_%s_%s_%s_%d.err" % (jobname, t, function, offset)),
         'function': function,
       }
       fp.write(cmd); fp.write('\n')

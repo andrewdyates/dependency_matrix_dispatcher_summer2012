@@ -66,8 +66,8 @@ def dispatch_pairwise(tabfile=None, outdir=WORK_DIR, function=None, k=200000, dr
         'end': end,
         'n': n,
         'work_dir': outdirs[function],
-        'stdout_fname': os.path.join(work_dir, "log_%s_%s_%s_%d_%d.out" % (jobname, t, function, start, end)),
-        'stderr_fname': os.path.join(work_dir, "log_%s_%s_%s_%d_%d.err" % (jobname, t, function, start, end)),
+        'stdout_fname': os.path.join(outdirs[function], "log_%s_%s_%s_%d_%d.out" % (jobname, t, function, start, end)),
+        'stderr_fname': os.path.join(outdirs[function], "log_%s_%s_%s_%d_%d.err" % (jobname, t, function, start, end)),
         'function': function,
       }
       fp.write(cmd); fp.write('\n')

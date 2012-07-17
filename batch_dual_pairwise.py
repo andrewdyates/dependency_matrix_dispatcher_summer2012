@@ -12,7 +12,7 @@ import sys
 
 #BATCH_CMD = "time python %(script_path)s/batch_dual_pairwise.py npyfile_1=%(npyfile_1)s npyfile_2=%(npyfile_2)s offset=%(offset)d work_dir=%(work_dir)s function=%(function)s >> %(stdout_fname)s 2>> %(stderr_fname)s"
 
-REPORT_N = 1000
+REPORT_N = 20000
 
 def main(npyfile_1=None, npyfile_2=None, offset=None, work_dir=None, function=None, batchname=None):
   assert npyfile_1 and npyfile_2 and work_dir
@@ -35,7 +35,7 @@ def main(npyfile_1=None, npyfile_2=None, offset=None, work_dir=None, function=No
       print "Generating pair %d (to %d) in %s..." % \
         (i, n, batchname)
     try:
-      R[i] = f(M[x], M[y])
+      R[i] = f(M1[offset], M2[i])
     except IndexError:
       print "WARNING! INDEX ERROR! i %d, x %d, y %d, n %d" %(i,x,y,n)
       raise

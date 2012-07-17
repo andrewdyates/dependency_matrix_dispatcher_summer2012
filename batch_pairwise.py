@@ -1,7 +1,7 @@
 #!/usr/bin/python
 from util import *
 import numpy.ma as ma
-from py_symmetric_matrix.cpy import *
+from py_symmetric_matrix import *
 import sys
 
 #BATCH_CMD = "time python %(script_path)s/batch_pairwise.py npyfile=%(npyfile)s offset=%(offset)d k=%(k)d work_dir=%(work_dir)s function=%(function)s n=%(n)d >> %(stdout_fname)s 2>> %(stderr_fname)s"
@@ -43,11 +43,13 @@ def main(npyfile=None, work_dir=None, function=None, n=None, start=None, end=Non
       print "Generating pair %d (to %d) in %s..." % \
         (i, end-1, batchname)
     x, y = inv_sym_idx(i, n)
+    assert x >= 0 and y >= 0
     try:
       R[i] = f(M[x], M[y])
     except IndexError:
       print "WARNING! INDEX ERROR! i %d, x %d, y %d, n %d" %(i,x,y,n)
       raise
+
   print "Computed %d pairs for %s" % (end-start, batchname)
 
   output_fname = os.path.join(work_dir, batchname+".npy")
