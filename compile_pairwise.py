@@ -23,7 +23,7 @@ def main(path, outpath_prefix, n):
 
   M = np.zeros(n, dtype=np.float32)
   B = np.zeros(n, dtype=np.bool)
-  n_set_total, n_dupe_total = 0, 0
+  n_set_total, n_dupe_total, n_nan_total = 0, 0, 0
   for fname in os.listdir(path):
     m = RX.match(fname)
     if m:
@@ -32,16 +32,19 @@ def main(path, outpath_prefix, n):
       n_set, n_dupe = 0, 0
       for i, x in enumerate(range(start, end)):
         M[x] = Q[i]
-        if not B[x]:
+        if Q[i] is np.nan:
+          n_nan += 1
+        elif not B[x]:
           B[x] = 1
           n_set += 1
         else:
           n_dupe += 1
-      print "%.2f%% Complete: Set %d (%d dupes) from %s. Expected %d." % \
-          ((end-start)/n_set*100, n_set, n_dupe, fname, end-start)
+      print "%.2f%% Complete: Set %d (%d dupes, %d nan) from %s. Expected %d." % \
+          ((end-start)/n_set*100, n_set, n_dupe, n_nan, fname, end-start)
       n_set_total += n_set
       n_dupe_total += n_dupe
-  print "%.2f%% Complete. Set %d (%d dupes) from %s. Expected %d." % (n_set_total/n*100, n_set_total, n_dupe_total, path, n)
+      n_nan_total += n_nan
+  print "%.2f%% Complete. Set %d (%d dupes, %d nan) from %s. Expected %d." % (n_set_total/n*100, n_set_total, n_dupe_total, n_nan_total, path, n)
   M_fname, B_fname = outpath_prefix+".values.npy", outpath_prefix+".isset.npy"
   np.save(M_fname, M)
   print "Saved %s." % (M_fname)

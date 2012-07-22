@@ -37,6 +37,7 @@ def main(npyfile=None, work_dir=None, function=None, n=None, start=None, end=Non
   M = ma.load(npyfile)
   f = FUNCTIONS[function]
   R = np.zeros(end-start)
+  n_nan = 0
   print "Starting to write %d pairs for %s" % (end-start, batchname)
   for i, j in enumerate(xrange(start, end)):
     if i % REPORT_N == 0:
@@ -49,8 +50,11 @@ def main(npyfile=None, work_dir=None, function=None, n=None, start=None, end=Non
     except IndexError:
       print "WARNING! INDEX ERROR! i %d, x %d, y %d, n %d" %(i,x,y,n)
       raise
+    if R[i] is np.nan:
+      n_nan += 1
 
   print "Computed %d pairs for %s" % (end-start, batchname)
+  print "%d nans" % (n_nan)
 
   output_fname = os.path.join(work_dir, batchname+".npy")
   print "Saving results %d through %d as %s. (zero-indexed)" % (start, end-1, output_fname)

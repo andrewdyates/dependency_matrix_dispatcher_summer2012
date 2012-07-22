@@ -5,6 +5,7 @@ USE EXAMPLE:
 
 python $HOME/dependency_matrix_dispatcher/dispatch_dual_pairwise.py outdir=/fs/lustre/osu6683/gse15745 tabfile_1=$HOME/gse15745/GSE15745.GPL6104.mRNA.normed.tab tabfile_2=$HOME/gse15745/GSE15745.GPL8178.miRNA.normed.tab tabfile_1_coltitles=$HOME/gse15745/GSE15745.GSE6104.subject_titles.txt tabfile_2_coltitles=$HOME/gse15745/GSE15745.GSE8178.subject_titles.txt dry=True
 """
+from __future__ import division
 from util import *
 import sys
 import shutil
@@ -35,8 +36,8 @@ def dispatch_dual_pairwise(tabfile_1=None, tabfile_2=None, tabfile_1_coltitles=N
     make_dir(path)
     outdirs[function] = os.path.abspath(path)
 
-  npy_fname_1, n1, M1 = npy_varlist_from_tabfile(tabfile_1, outdir)
-  npy_fname_2, n2, M2 = npy_varlist_from_tabfile(tabfile_2, outdir)
+  npy_fname_1, n1, M1 = npy_varlist_from_tabfile(tabfile_1, outdir, overwrite=True)
+  npy_fname_2, n2, M2 = npy_varlist_from_tabfile(tabfile_2, outdir, overwrite=True)
 
   # let the smaller matrix be matrix 1
   if n1 > n2:
@@ -48,7 +49,13 @@ def dispatch_dual_pairwise(tabfile_1=None, tabfile_2=None, tabfile_1_coltitles=N
     M1, M2 = M2, M1
     print "Swapped matrices 1 and 2 so that matrix 1 is smaller."
 
-  # Column-Align two matrices. TODO: use cached matrices
+  # Print analytics
+  print "Created Matrix 1: %s" % npy_fname_1
+  print_matrix_stats(M1)
+  print "Created Matrix 2: %s" % npy_fname_2
+  print_matrix_stats(M2)
+  
+  # Column-Align two matrices. 
   npy_basename_1 = os.path.basename(npy_fname_1)
   npy_basename_2 = os.path.basename(npy_fname_2)
   npy_aligned_fname_1 = os.path.join(work_dir, "%s_aligned_with_%s.npy" % (npy_basename_1, npy_basename_2))
@@ -68,6 +75,11 @@ def dispatch_dual_pairwise(tabfile_1=None, tabfile_2=None, tabfile_1_coltitles=N
   print "Created (%d x %d) M1 and (%d x %d) M2" % (n1, len(cols), n2, len(cols))
   print "M1_aligned: (%d x %d). M2_aligned: (%d x %d)." % \
     (np.size(M1_aligned,0),np.size(M1_aligned,1),np.size(M2_aligned,0),np.size(M2_aligned,1))
+  print "M1_aligned"
+  print_matrix_stats(M1_aligned)
+  print "M2_aligned"
+  print_matrix_stats(M2_aligned)
+  
   # Save column aligned matrices.
   print "Saving %s and %s..." % (npy_aligned_fname_1, npy_aligned_fname_2)
   ma.dump(M1_aligned, npy_aligned_fname_1)

@@ -56,7 +56,7 @@ def read_samples(tabfile_1_coltitles):
   return sample_titles_1, sample_titles_set_1, idx_1
 
 
-def npy_varlist_from_tabfile(tabfile, outdir):
+def npy_varlist_from_tabfile(tabfile, outdir, overwrite=False):
   """Import tabfile into numpy matrix and variable list; save to disk.
 
   Args:
@@ -66,7 +66,7 @@ def npy_varlist_from_tabfile(tabfile, outdir):
   """
   varlist_fname = os.path.join(outdir, os.path.basename(tabfile) + ".varlist.txt")
   npy_fname = os.path.join(outdir, "%s.npy" % tabfile)
-  if os.path.exists(varlist_fname) and os.path.exists(npy_fname):
+  if not overwrite and os.path.exists(varlist_fname) and os.path.exists(npy_fname):
     print "Both %s and %s exist, do not recreate varlist and numpy masked matrix files." % \
         (varlist_fname, npy_fname)
     # load numpy matrix to get its size
@@ -91,6 +91,12 @@ def npy_varlist_from_tabfile(tabfile, outdir):
   return npy_fname, n, M
   
 
+def print_matrix_stats(M1):
+  n_missing1 = np.count_nonzero(M1.mask)
+  t1 = np.size(M1.ravel())
+  print "Missing values: %d of %d (%d by %d) (%.2f%%)" % \
+      (n_missing1, t1, np.size(M1,0), np.size(M1,1), n_missing1/t1)
+  print "nans: Total: %d, With Mask: %d" % (np.count_nonzero(np.isnan(M1)), np.count_nonzero(np.isnan(M1.compressed())))
 
 def make_dir(outdir):
   try:
