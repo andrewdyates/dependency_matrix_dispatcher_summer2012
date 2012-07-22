@@ -37,7 +37,11 @@ For vectors of length 1000, this is about 40% faster.
 10 loops, best of 3: 52.1 ms per loop
 %timeit cy.dcov_all(A,B)
 10 loops, best of 3: 31.5 ms per loop
+
+HOWEVER: it does not handle missing values which must be handled prior to passing
+vectors to this function.
 """
+DCOR_LIB = "cython"
 
 
 import numpy as np

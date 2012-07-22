@@ -29,23 +29,29 @@ def main(path, outpath_prefix, n_rows, n_cols):
     if m:
       row_num = int(m.group(1))
       Q = np.load(os.path.join(path,fname))
+      q_nans = np.count_nonzero(np.isnan(Q))
+      assert q_nans == 0, q_nans
       n_set, n_dupe, n_nan = 0, 0, 0
       assert np.size(Q,0) == n_cols
       for i in xrange(n_cols):
         M[row_num,i] = Q[i]
-        if Q[i] is np.nan:
+        if np.isnan(Q[i]):
           n_nan += 1
         elif not B[row_num,i]:
           B[row_num,i] = 1
           n_set += 1
         else:
           n_dupe += 1
+        # assert not np.isnan(M[row_num,i])
       print "%.2f%% Complete: Set %d (%d dupes, %d n_nan) from %s. Expected %d." % \
-          ((n_cols)/n_set*100, n_set, n_dupe, n_nan, fname, n_cols)
+          ((n_set)/n_cols*100, n_set, n_dupe, n_nan, fname, n_cols)
       n_set_total += n_set
       n_dupe_total += n_dupe
       n_nan_total += n_dupe
+      
   print "%.2f%% Complete. Set %d (%d dupes, %d nan) from %s. Expected %d." % (n_set_total/n*100, n_set_total, n_dupe_total, n_nan_total, path, n)
+  assert np.count_nonzero(np.isnan(M)) == 0
+  
   M_fname, B_fname = outpath_prefix+".values.npy", outpath_prefix+".isset.npy"
   np.save(M_fname, M)
   print "Saved %s." % (M_fname)

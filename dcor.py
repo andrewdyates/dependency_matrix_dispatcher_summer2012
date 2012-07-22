@@ -6,6 +6,7 @@ http://jpktd.blogspot.com/2012/06/non-linear-dependence-measures-distance.html
 
 NOTE: author's R implementation uses square root even though Joepy does not.
 """
+DCOR_LIB = "Numpy"
 
 def dist(x, y):
   #1d only

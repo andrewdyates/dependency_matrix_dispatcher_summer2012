@@ -1,16 +1,19 @@
 #!/usr/bin/python
-"""Compute dependencies between two matrices.
+"""dCOR implementation test
 
 1) load both matrices
 2) get offset row of first matrix
 3) compute all dependencies of offset row with other matrix
 4) save results to disk
 
-Only compute dCOR for pairs with both values present.
+from dcor_cpy import *
+#from dcor import *
 """
 from util import *
 import numpy.ma as ma
 import sys
+import dcor_cpy
+import dcor
 
 #BATCH_CMD = "time python %(script_path)s/batch_dual_pairwise.py npyfile_1=%(npyfile_1)s npyfile_2=%(npyfile_2)s offset=%(offset)d work_dir=%(work_dir)s function=%(function)s >> %(stdout_fname)s 2>> %(stderr_fname)s"
 
@@ -44,7 +47,14 @@ def main(npyfile_1=None, npyfile_2=None, offset=None, work_dir=None, function=No
     # Mask pairs with at least one missing value
     shared_mask = ~(M1[offset].mask | M2[i].mask)
     try:
-      R[i] = f(M1[offset][shared_mask], M2[i][shared_mask])
+      # compare dCOR implementations
+      # R[i] = f(M1[offset][shared_mask], M2[i][shared_mask])
+      x = dcor.dcov_all(M1[offset][shared_mask], M2[i][shared_mask])[0]
+      y = dcor_cpy.dcov_all(M1[offset][shared_mask], M2[i][shared_mask])[0]
+      z = dcor.dcov_all(M1[offset], M2[i])[0]
+      # note: while close, z is a bit off because pairs with only one missing value
+      #   are still considered
+      print abs(x-y)<0.0001 and abs(y-z)<0.0001, x, y, z
     except IndexError:
       print "WARNING! INDEX ERROR! i %d, x %d, y %d, n %d" %(i,x,y,n)
       raise
