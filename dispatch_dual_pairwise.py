@@ -62,8 +62,8 @@ def dispatch_dual_pairwise(tabfile_1=None, tabfile_2=None, tabfile_1_coltitles=N
   npy_aligned_fname_2 = os.path.join(work_dir, "%s_aligned_with_%s.npy" % (npy_basename_2, npy_basename_1))
   titles1, set1, idx1 = read_samples(tabfile_1_coltitles)
   titles2, set2, idx2 = read_samples(tabfile_2_coltitles)
-  assert len(titles1) == len(set1) == np.size(M, 1)
-  assert len(titles2) == len(set2) == np.size(M, 2)
+  assert len(titles1) == len(set1) == np.size(M1, 1)
+  assert len(titles2) == len(set2) == np.size(M2, 1)
   cols = []
   for s in titles1:
     if s in set2:
