@@ -12,7 +12,7 @@ import sys
 
 #BATCH_CMD = "time python %(script_path)s/batch_dual_pairwise.py npyfile_1=%(npyfile_1)s npyfile_2=%(npyfile_2)s offset=%(offset)d work_dir=%(work_dir)s function=%(function)s >> %(stdout_fname)s 2>> %(stderr_fname)s"
 
-REPORT_N = 1000
+REPORT_N = 10000
 
 def main(npyfile_1=None, npyfile_2=None, offset=None, work_dir=None, function=None, batchname=None):
   assert npyfile_1 and npyfile_2 and work_dir
@@ -26,16 +26,28 @@ def main(npyfile_1=None, npyfile_2=None, offset=None, work_dir=None, function=No
   M1 = ma.load(npyfile_1)
   M2 = ma.load(npyfile_2)
   assert offset < np.size(M1, 0)
+  assert np.count_nonzero(np.isnan(M1.compressed())) == 0
+  assert np.count_nonzero(np.isnan(M2.compressed())) == 0
   f = FUNCTIONS[function]
   n = np.size(M2, 0)
   R = np.zeros(n)
+  n_nan = 0
   print "Starting to write %d pairs for %s" % (n, batchname)
   for i in xrange(n):
     if i % REPORT_N == 0:
       print "Generating pair %d (to %d) in %s..." % \
         (i, n, batchname)
-    R[i] = f(M1[offset], M2[i])
+    try:
+      R[i] = f(M1[offset], M2[i])
+    except IndexError:
+      print "WARNING! INDEX ERROR! i %d, x %d, y %d, n %d" %(i,x,y,n)
+      raise
+    if R[i] is np.nan:
+      n_nan += 1
+      print "NAN!", offset, i
+    
   print "Computed %d pairs for %s using %s." % (n, batchname, function)
+  print "%d nans" % (n_nan)
 
   output_fname = os.path.join(work_dir, batchname+".npy")
   print "Saving %d results at %s." % (n, output_fname)

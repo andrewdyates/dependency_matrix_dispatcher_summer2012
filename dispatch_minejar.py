@@ -60,7 +60,7 @@ def dispatch_minejar(tabfile=None, n_nodes=2, n_ppn=12, walltime='6:00:00', \
   fp.close()
 
   # Submit job script.
-  qsub_script = QSUB_TEMPLATE % {'jobname': jobname, 'n_nodes': n_nodes, 'n_ppn': n_ppn, 'walltime': walltime, 'dispatch_script': dispatch_script_fname}
+  qsub_script = QSUB_TEMPLATE % {'jobname': jobname, 'n_nodes': n_nodes, 'n_ppn': n_ppn, 'walltime': walltime, 'dispatch_script': dispatch_script_fname, 'num_jobs': n, 'k': 0, 'num_pairs': n*(n-1)/2, 'function': 'MINE.jar'}
   print qsub_script
   if not dry:
     fork_qsub_submit(qsub_script)

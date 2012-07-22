@@ -35,8 +35,8 @@ def euclidean(x,y):
 FUNCTIONS = {
   'pearson': lambda x, y: mstats.pearsonr(x,y)[0],
   'spearman': lambda x, y: mstats.spearmanr(x,y)[0],
-  'euclidean': euclidean,
-  'kendalltau': lambda x,y: mstats.kendalltau(x,y)[0],
+#  'euclidean': euclidean,
+#  'kendalltau': lambda x,y: mstats.kendalltau(x,y)[0],
   'dcor': lambda x,y: dcov_all(x,y)[1],
   }
 
@@ -49,13 +49,14 @@ def move_numpy_to_workdir(work_dir, npy_fname):
   return work_npy_fname
 
 def read_samples(tabfile_1_coltitles):
-  sample_titles_1 = [s for s in open(tabfile_1_coltitles).next().strip('\n').split('\t')]
+  sample_titles_1 = [s for s in open(tabfile_1_coltitles).next().strip('\n').split(',')]
+  assert len(sample_titles_1) > 1, "delimit sample titles with commas"
   sample_titles_set_1 = set(sample_titles_1)
-  idx_1 = dict([(i, s) for i, s in enumerate(sample_titles_1)])
+  idx_1 = dict([(s, i) for i, s in enumerate(sample_titles_1)])
   return sample_titles_1, sample_titles_set_1, idx_1
 
 
-def npy_varlist_from_tabfile(tabfile, outdir):
+def npy_varlist_from_tabfile(tabfile, outdir, overwrite=False):
   """Import tabfile into numpy matrix and variable list; save to disk.
 
   Args:
@@ -65,7 +66,7 @@ def npy_varlist_from_tabfile(tabfile, outdir):
   """
   varlist_fname = os.path.join(outdir, os.path.basename(tabfile) + ".varlist.txt")
   npy_fname = os.path.join(outdir, "%s.npy" % tabfile)
-  if os.path.exists(varlist_fname) and os.path.exists(npy_fname):
+  if not overwrite and os.path.exists(varlist_fname) and os.path.exists(npy_fname):
     print "Both %s and %s exist, do not recreate varlist and numpy masked matrix files." % \
         (varlist_fname, npy_fname)
     # load numpy matrix to get its size
@@ -90,6 +91,12 @@ def npy_varlist_from_tabfile(tabfile, outdir):
   return npy_fname, n, M
   
 
+def print_matrix_stats(M1):
+  n_missing1 = np.count_nonzero(M1.mask)
+  t1 = np.size(M1.ravel())
+  print "Missing values: %d of %d (%d by %d) (%.2f%%)" % \
+      (n_missing1, t1, np.size(M1,0), np.size(M1,1), n_missing1/t1)
+  print "nans: Total: %d, With Mask: %d" % (np.count_nonzero(np.isnan(M1)), np.count_nonzero(np.isnan(M1.compressed())))
 
 def make_dir(outdir):
   try:
@@ -109,7 +116,7 @@ def is_dry(dry):
   if type(dry) == str and dry.lower() in ('false', 'f', 'none', ''):
     return False
   else:
-    return True
+    return bool(dry)
 
 def count_tab_rows(tabfile):
   x = len([None for f in open(tabfile) if f[0] not in ('\n', '#')])
