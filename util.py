@@ -41,11 +41,15 @@ FUNCTIONS = {
   }
 
 
-def move_numpy_to_workdir(work_dir, npy_fname):
+def move_numpy_to_workdir(work_dir, npy_fname, do_copy=False):
   work_npy_fname = os.path.join(work_dir, os.path.basename(npy_fname))
   if not os.path.exists(work_npy_fname):
-    shutil.move(npy_fname, work_npy_fname)
-    print "Moved %s to %s." % (npy_fname, work_npy_fname)
+    if do_copy:
+      shutil.copyfile(npy_fname, work_npy_fname)
+      print "Copied %s to %s." % (npy_fname, work_npy_fname)
+    else:
+      shutil.move(npy_fname, work_npy_fname)
+      print "Moved %s to %s." % (npy_fname, work_npy_fname)
   return work_npy_fname
 
 def read_samples(tabfile_1_coltitles):
