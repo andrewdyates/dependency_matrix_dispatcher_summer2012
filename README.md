@@ -23,19 +23,19 @@ enumerated binary numpy (*.npy) matrix.
 execution and compiles them all into a single .npy matrix
 
 
-##Compute n choose 2 pairs of dependencies.##
+###Compute n choose 2 pairs of dependencies.###
 
 1. dispatch_pairwise.py
 2. batch_pairwise.py
 3. compile_pairwise.py
 
-##Compute n choose 2 pairs of dependencies using Reshef et al. MINE.jar##
+###Compute n choose 2 pairs of dependencies using Reshef et al. MINE.jar###
 
 1. dispatch_minejar.py
 2. batch_minejar.py
 3. compile_minejar.py
 
-##Compute n*m pairs of dependencies between two matrices.##
+###Compute n*m pairs of dependencies between two matrices.###
 
 1. dispatch_dual_pairwise.py
 2. batch_dual_pairwise.py
