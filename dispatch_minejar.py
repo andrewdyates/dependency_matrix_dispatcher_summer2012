@@ -21,6 +21,10 @@ def dispatch_minejar(tabfile=None, n_nodes=2, n_ppn=12, walltime='6:00:00', \
   assert tabfile
   n_nodes, n_ppn, start_offset = map(int, (n_nodes, n_ppn, start_offset))
   dry = is_dry(dry)
+  
+  if not os.path.exists(work_dir):
+    print "Creating work_dir '%s'..." % (work_dir)
+    make_dir(work_dir)
 
   if jobname is None: 
     jobname = os.path.basename(tabfile)
