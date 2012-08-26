@@ -80,7 +80,7 @@ def main(npyfile=None, work_dir=None, n=None, start=None, end=None, batchname=No
   print "Computed %d pairs for %s" % (end-start, batchname)
   print "%d mic nans, %d mas nans, %d mev nans, %d mcv nans" % (n_nan_mic, n_nan_mas, n_nan_mev, n_nan_mcv)
   n_bad = sum((n_nan_mic, n_nan_mas, n_nan_mev, n_nan_mcv))
-  if n_bad > 0
+  if n_bad > 0:
     print "!!!WARNING: There exists at least one (%d) not-a-numbers (nans) in this batch." % n_bad
 
   # Save each of 4 matrices
