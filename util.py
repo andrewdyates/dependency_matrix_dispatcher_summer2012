@@ -1,6 +1,7 @@
 #!/usr/bin/python
 """Note: this file contains redundant functionality implemented in other modules."""
 import subprocess
+import sys
 import datetime
 from dcor_cpy import *
 #from dcor import *

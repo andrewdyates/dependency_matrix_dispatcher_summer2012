@@ -50,7 +50,7 @@ def main(npyfile=None, work_dir=None, function=None, n=None, start=None, end=Non
     except IndexError:
       print "WARNING! INDEX ERROR! i %d, x %d, y %d, n %d" %(i,x,y,n)
       raise
-    if R[i] is np.nan:
+    if np.isnan(R[i]):
       n_nan += 1
 
   print "Computed %d pairs for %s" % (end-start, batchname)
