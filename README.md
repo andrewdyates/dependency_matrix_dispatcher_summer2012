@@ -16,9 +16,9 @@ Workflow
 
 1. `dispatch_*.py` reads a data matrix, divides work into many executions of `batch_*.py`,
 and dispatches these jobs using `qsub` to compute this work in parallel.
-2. `batch_*.py' computes a set of vector pair dependencies and saves the result as an
+2. `batch_*.py` computes a set of vector pair dependencies and saves the result as an
 enumerated binary numpy (*.npy) matrix.
-3. `compile_*.py' reads all the *.npy matrices saved from each completed `batch_*.py`
+3. `compile_*.py` reads all the *.npy matrices saved from each completed `batch_*.py`
 execution and compiles them all into a single .npy matrix
 
 
@@ -28,21 +28,24 @@ execution and compiles them all into a single .npy matrix
 2. batch_pairwise.py
 3. compile_pairwise.py
 
-Alternate batch_*.py for dispatch_pairwise.py
+_Alternate batch_*.py for dispatch_pairwise.py_
 * batch_minepy_pairwise.py: Save 4 MINE statistics (MIC, MEV, MCN, MAS) computed using cmine Python wrapper
-
-###Compute n choose 2 pairs of dependencies using Reshef et al. MINE.jar###
-_depreciated_
-
-1. dispatch_minejar.py
-2. batch_minejar.py
-3. compile_minejar.py
 
 ###Compute n*m pairs of dependencies between two matrices.###
 
 1. dispatch_dual_pairwise.py
 2. batch_dual_pairwise.py
 3. compile_dual_pairwise.py
+
+_depreciated_
+
+###Compute n choose 2 pairs of dependencies using Reshef et al. MINE.jar###
+
+1. dispatch_minejar.py
+2. batch_minejar.py
+3. compile_minejar.py
+
+
 
 
 
