@@ -20,7 +20,7 @@ import minepy
 
 REPORT_N = 50000
 
-def main(npyfile=None, work_dir=None, n=None, start=None, end=None, batchname=None, alpha=0.6, c=15):
+def main(npyfile=None, work_dir=None, n=None, start=None, end=None, batchname=None, alpha=0.6, c=15, *args, **kwds):
   function = "minepy"
   assert npyfile, work_dir
   n, start, end = map(int, (n, start, end))

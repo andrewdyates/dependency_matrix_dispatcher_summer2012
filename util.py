@@ -3,8 +3,9 @@
 import subprocess
 import sys
 import datetime
-from dcor_cpy import *
-#from dcor import *
+# Comment cpy dcor, uncomment native python dcor for pychecker.
+#from dcor_cpy import *
+from dcor import *
 import os
 import errno
 from numpy import ma
@@ -40,6 +41,8 @@ FUNCTIONS = {
 #  'euclidean': euclidean,
 #  'kendalltau': lambda x,y: mstats.kendalltau(x,y)[0],
   'dcor': lambda x,y: dcov_all(x,y)[1],
+   # Custom batch scripts.
+  'minepy': "batch_minepy_pairwise.py",
   }
 
 
