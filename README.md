@@ -37,9 +37,7 @@ _Alternate batch_*.py for dispatch_pairwise.py_
 2. batch_dual_pairwise.py
 3. compile_dual_pairwise.py
 
-_depreciated_
-
-###Compute n choose 2 pairs of dependencies using Reshef et al. MINE.jar###
+###[depreciated] Compute n choose 2 pairs of dependencies using Reshef et al. MINE.jar###
 
 1. dispatch_minejar.py
 2. batch_minejar.py
