@@ -4,9 +4,8 @@
 Note: .npy now should be .pkl
 
 USE EXAMPLE:
-python dispatch_pairwise.py outdir=/fs/lustre/osu6683/gse15745 tabfile=$HOME/gse15745/GSE15745.GPL6104.mRNA.normed.tab dry=True
 
-time python $HOME/dependency_matrix_dispatcher/dispatch_pairwise.py outdir=/fs/lustre/osu6683/gse15745 npy_file=/nfs/01/osu6683/gse15745/old/GSE15745.GPL6104.mRNA.normed.tab.npy_aligned_with_GSE15745.GPL8490.methyl.normed.tab.npy.npy.TCTX.npy dry=True
+time python $HOME/dependency_matrix_dispatcher/dispatch_pairwise.py outdir=/fs/lustre/osu6683/gse7307 tabfile=/nfs/01/osu6683/gse7307/GSE7307_GPL570.normed.masked.pkl.gt0.25.pina.tab dry=True
 """
 from util import *
 import sys
@@ -15,7 +14,7 @@ import math
 import cPickle as pickle
 
 
-BATCH_CMD = "time python %(script_path)s/%(script_name)s npyfile=%(npyfile)s start=%(start)d end=%(end)d work_dir=%(work_dir)s function=%(function)s n=%(n)d > %(stdout_fname)s 2> %(stderr_fname)s"
+BATCH_CMD = "time python %(script_path)s/%(script_fname)s npyfile=%(npyfile)s start=%(start)d end=%(end)d work_dir=%(work_dir)s function=%(function)s n=%(n)d > %(stdout_fname)s 2> %(stderr_fname)s"
 
 def dispatch_pairwise(tabfile=None, pkl_file=None, outdir=WORK_DIR, function=None, k=200000, dry=False, start_offset=0, work_dir=WORK_DIR, jobname=None, n_nodes=6, n_ppn=12, walltime='24:00:00'):
   assert bool(tabfile is None) != bool(pkl_file is None)
@@ -61,9 +60,9 @@ def dispatch_pairwise(tabfile=None, pkl_file=None, outdir=WORK_DIR, function=Non
     n = np.size(M,0)
     print "M is (%d by %d)" % (np.size(M,0), np.size(M,1))
     del M
-  # Convert .tab into npy matrix
+  # Convert .tab into pickled npy np.ma.MaskedArray matrix
   else:
-    npy_fname, n, M = npy_varlist_from_tabfile(tabfile, outdir)
+    pkl_file, n, M = npy_varlist_from_tabfile(tabfile, outdir)
     del M
 
   # Move npy_fname to workdir

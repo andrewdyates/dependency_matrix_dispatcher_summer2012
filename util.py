@@ -3,6 +3,7 @@
 import subprocess
 import sys
 import datetime
+import cPickle as pickle
 # Comment cpy dcor, uncomment native python dcor for pychecker.
 #from dcor_cpy import *
 from dcor import *
@@ -66,20 +67,25 @@ def read_samples(tabfile_1_coltitles):
 
 
 def npy_varlist_from_tabfile(tabfile, outdir, overwrite=False):
-  """Import tabfile into numpy matrix and variable list; save to disk.
+  """Convert .tab into pickled npy np.ma.MaskedArray matrix and variable list; save to disk.
 
   Args:
     tabfile: str of path to .tab input data file
   Returns:
-    (str, int) of path to saved numpy object and number of rows in data matrix
+    (str, int, np.ma.MaskedArray) of path to pickled numpy object, rows in data matrix, M
   """
   varlist_fname = os.path.join(outdir, os.path.basename(tabfile) + ".varlist.txt")
-  npy_fname = os.path.join(outdir, "%s.npy" % tabfile)
+  npy_fname = os.path.join(outdir, "%s.pkl" % tabfile)
   if not overwrite and os.path.exists(varlist_fname) and os.path.exists(npy_fname):
-    print "Both %s and %s exist, do not recreate varlist and numpy masked matrix files." % \
+    print "Both %s and %s exist, do not recreate varlist and pickled numpy masked matrix files." % \
         (varlist_fname, npy_fname)
     # load numpy matrix to get its size
-    M = ma.load(npy_fname)
+    try:
+      M = pickle.load(open(npy_fname))
+    except EOFError:
+      # Some error may have occurred in a previous save. Reload .tab and overwrite pickle.
+      print "Error reading %s. Attempt to recreate and overwrite." % (npy_fname)
+      return npy_varlist_from_tabfile(tabfile, outdir, overwrite=True)
     n = np.size(M, 0)
   else:
     # import tab
@@ -89,11 +95,13 @@ def npy_varlist_from_tabfile(tabfile, outdir, overwrite=False):
     M = np.genfromtxt(name_iter(open(tabfile), varlist), usemask=True, delimiter='\t', missing_values=MISSING_VALUES, dtype=np.float)
     n = np.size(M, 0) # number of rows (variables)
     # save to file
-    print "Saving matrix and varlist..."
+    print "Saving %d rows in varlist to %s..." % (len(varlist), varlist_fname)
     fp = open(varlist_fname, "w")
     fp.write('\n'.join(varlist))
     fp.close()
-    ma.dump(M, npy_fname)
+    print "Saving %d rows, %d columns of matrix as protocol 2 pickle to %s..." % \
+        (np.size(M,0), np.size(M,1), npy_fname)
+    pickle.dump(M, open(npy_fname, 'w'), protocol=2)
     
   n_nans = np.count_nonzero(np.isnan(M.compressed()))
   assert n_nans == 0, "%d 'nan's exists in matrix %s!" % (n_nans, npy_fname)
