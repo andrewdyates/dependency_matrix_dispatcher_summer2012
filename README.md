@@ -5,12 +5,11 @@ All matrices are assumed to be row vectors, column dimensions.
 
 *See individual file docstrings for use details.*
 
-####Natively computes####
-* Pearson's Correlation
-* Spearman's Correlation
-* Distance Correlation
-* _Support for other measures of vector pair dependencies_
-* _Also supports row-vs-all MINE computation using Java wrapper._
+####Computes####
+* Pearson's Correlation (R or PCC)
+* Spearman's Correlation (rho)
+* Distance Correlation (dCOR)
+* MINE (using the minepy module at http://minepy.sourceforge.net/)
 
 Workflow
 --------
@@ -29,7 +28,11 @@ execution and compiles them all into a single .npy matrix
 2. batch_pairwise.py
 3. compile_pairwise.py
 
+Alternate batch_*.py for dispatch_pairwise.py
+* batch_minepy_pairwise.py: Save 4 MINE statistics (MIC, MEV, MCN, MAS) computed using cmine Python wrapper
+
 ###Compute n choose 2 pairs of dependencies using Reshef et al. MINE.jar###
+_depreciated_
 
 1. dispatch_minejar.py
 2. batch_minejar.py
