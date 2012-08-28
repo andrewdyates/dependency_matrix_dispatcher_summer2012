@@ -67,6 +67,7 @@ def main(npyfile=None, work_dir=None, n=None, start=None, end=None, batchname=No
         (i, end-1, batchname)
     x, y = inv_sym_idx(i, n)
     assert x >= 0 and y >= 0
+    # TODO: mask missing values like shared_mask = ~(M1[offset].mask | M2[i].mask)
     # Create minepy computation object
     mine = minepy.MINE(alpha=alpha, c=c)
     try:
