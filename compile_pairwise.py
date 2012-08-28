@@ -18,9 +18,15 @@ import os, sys
 RX = re.compile('.*?_(\d+)_(\d+)\.npy')
 
 
-def main(path, outpath_prefix, n):
+def main(path, outpath_prefix, n=None, npy_fname=None):
   assert path, outpath_prefix
-  n = int(n)
+
+  if n is not None:
+    n = int(n)
+  else:
+    assert npy_fname is not None
+    M = np.load(npy_fname)
+    n = np.size(M,0)
   assert n > 0
 
   M = np.zeros(n, dtype=np.float32)
@@ -34,7 +40,7 @@ def main(path, outpath_prefix, n):
       n_set, n_dupe, n_nan = 0, 0, 0
       for i, x in enumerate(range(start, end)):
         M[x] = Q[i]
-        if Q[i] is np.nan:
+        if np.isnan(Q[i]):
           n_nan += 1
         elif not B[x]:
           B[x] = 1
