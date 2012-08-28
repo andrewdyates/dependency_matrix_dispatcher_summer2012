@@ -1,7 +1,6 @@
 #!/usr/bin/python
 """Note: this file contains redundant functionality implemented in other modules."""
 import subprocess
-import sys
 import datetime
 import cPickle as pickle
 # Comment cpy dcor, uncomment native python dcor for pychecker.

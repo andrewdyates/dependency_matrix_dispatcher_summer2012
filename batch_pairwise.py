@@ -3,6 +3,7 @@ from util import *
 import numpy.ma as ma
 from py_symmetric_matrix import *
 import sys
+import cPickle as pickle
 
 #BATCH_CMD = "time python %(script_path)s/batch_pairwise.py npyfile=%(npyfile)s offset=%(offset)d k=%(k)d work_dir=%(work_dir)s function=%(function)s n=%(n)d >> %(stdout_fname)s 2>> %(stderr_fname)s"
 
@@ -34,8 +35,16 @@ def main(npyfile=None, work_dir=None, function=None, n=None, start=None, end=Non
     end = int(end)
 
   print "Loading %s..." % npyfile
+  if npyfile.rpartition('.')[2].lower() == 'pkl':
+    print "Loading as level 2 pickle"
+    M = pickle.load(open(npyfile))
+  else:
+    print "Loading as level 0 numpy.MaskedArray pickle"
+    M = ma.load(npyfile)
   M = ma.load(npyfile)
   f = FUNCTIONS[function]
+  if function == "dcor":
+    print "dCOR implementation:", DCOR_LIB
   R = np.zeros(end-start)
   n_nan = 0
   print "Starting to write %d pairs for %s" % (end-start, batchname)
@@ -46,7 +55,8 @@ def main(npyfile=None, work_dir=None, function=None, n=None, start=None, end=Non
     x, y = inv_sym_idx(i, n)
     assert x >= 0 and y >= 0
     try:
-      R[i] = f(M[x], M[y])
+      shared_mask = ~(M[x].mask | M[y].mask)
+      R[i] = f(M[x][shared_mask], M[y][shared_mask])
     except IndexError:
       print "WARNING! INDEX ERROR! i %d, x %d, y %d, n %d" %(i,x,y,n)
       raise

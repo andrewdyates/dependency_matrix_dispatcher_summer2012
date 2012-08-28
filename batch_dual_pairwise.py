@@ -25,7 +25,7 @@ def main(npyfile_1=None, npyfile_2=None, offset=None, work_dir=None, function=No
     batchname = "%s_vs_%s_%s_%d" % \
       (os.path.basename(npyfile_1), os.path.basename(npyfile_2), function, offset)
 
-  M1 = ma.load(npyfile_1)
+  M1 = ma.load(npyfile_1) # these should be pickles
   M2 = ma.load(npyfile_2)
   assert offset < np.size(M1, 0)
   assert np.count_nonzero(np.isnan(M1.compressed())) == 0
@@ -43,11 +43,8 @@ def main(npyfile_1=None, npyfile_2=None, offset=None, work_dir=None, function=No
         (i, n, batchname)
     # Mask pairs with at least one missing value
     shared_mask = ~(M1[offset].mask | M2[i].mask)
-    try:
-      R[i] = f(M1[offset][shared_mask], M2[i][shared_mask])
-    except IndexError:
-      print "WARNING! INDEX ERROR! i %d, x %d, y %d, n %d" %(i,x,y,n)
-      raise
+    R[i] = f(M1[offset][shared_mask], M2[i][shared_mask])
+
     if np.isnan(R[i]):
       n_nan += 1
       m1_masked = np.count_nonzero(M1.mask)

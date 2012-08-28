@@ -69,8 +69,9 @@ def main(npyfile=None, work_dir=None, n=None, start=None, end=None, batchname=No
     assert x >= 0 and y >= 0
     # Create minepy computation object
     mine = minepy.MINE(alpha=alpha, c=c)
+    shared_mask = ~(M[x].mask | M[y].mask)
     try:
-      mine.score(M[x], M[y])
+      mine.score(M[x][shared_mask], M[y][shared_mask])
     except IndexError:
       print "WARNING! INDEX ERROR! i %d, x %d, y %d, n %d" %(i,x,y,n)
       raise
