@@ -1,3 +1,6 @@
 [submodule "py_symmetric_matrix"]
 	path = py_symmetric_matrix
 	url = git@github.com:andrewdyates/py_symmetric_matrix.git
+[submodule "HHG_R"]
+	path = HHG_R
+	url = git@github.com:andrewdyates/HHG_R.git
