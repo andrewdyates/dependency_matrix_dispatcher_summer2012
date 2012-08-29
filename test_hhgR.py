@@ -23,14 +23,20 @@ robjects.globalenv["y"] = y
 
 r('Dx = as.matrix(dist((x),diag=TRUE,upper=TRUE))')
 r('Dy = as.matrix(dist((y),diag=TRUE,upper=TRUE))')
-print r('myHHG(Dx,Dy)')
+HHG = r('myHHG(Dx,Dy)')
+print HHG
+# Names:
+#   sum_chisquared
+#   sum_lr
+#   max_chisquared
+#   max_lr
+for name, value in HHG.iteritems():
+  print type(value)
+  print type(value[0])
+  print name, float(value[0])
+  
+print float(HHG.rx('sum_chisquared')[0][0])
 
-#print X[0], X.rx(1, 1)[0] 
-#print X[1], X.rx(2, 1)[0]
-#print X[2], X.rx(1, 2)[0]
-#print "columns:", X.ncol
-#print "rows:", X.nrow
-# This is not elegant, but it works. Look for R Matrix row/column selection in the future.
 
 
 # This works.
@@ -39,3 +45,10 @@ print r('myHHG(Dx,Dy)')
 # r('Dx = as.matrix(dist((X[1,]),diag=TRUE,upper=TRUE))')
 # r('Dy = as.matrix(dist((X[2,]),diag=TRUE,upper=TRUE))')
 # print r('myHHG(Dx,Dy)')
+#print X[0], X.rx(1, 1)[0] 
+#print X[1], X.rx(2, 1)[0]
+#print X[2], X.rx(1, 2)[0]
+#print "columns:", X.ncol
+#print "rows:", X.nrow
+# This is not elegant, but it works. Look for R Matrix row/column selection in the future.
+
