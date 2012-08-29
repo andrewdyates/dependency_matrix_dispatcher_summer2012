@@ -14,7 +14,7 @@ Unlike other batch_pairwise.py script, this computes several matrices at once; o
   each of the HHG statistics.
 
 EXAMPLE MANUAL USE:
-  time python $HOME/dependency_matrix_dispatcher/batch_hhgR_pairwise.py npyfile=/fs/lustre/osu6683/GSE7307.normed.tab.pkl work_dir=/fs/lustre/osu6683/gse7307/minepy_test n=54675 start=0 end=10 batchname=hhgR_test
+  time python $HOME/dependency_matrix_dispatcher/batch_hhgR_pairwise.py npyfile=/fs/lustre/osu6683/GSE7307.normed.tab.pkl work_dir=/fs/lustre/osu6683/gse7307/hhgR_test n=54675 start=0 end=10 batchname=hhgR_test verbose=True
 """
 from util import *
 import numpy as np
@@ -30,14 +30,21 @@ import rpy2.robjects.numpy2ri
 rpy2.robjects.numpy2ri.activate()
 REPORT_N = 50000
 
-def main(npyfile=None, work_dir=None, n=None, start=None, end=None, batchname=None, *args, **kwds):
+def main(npyfile=None, work_dir=None, n=None, start=None, end=None, batchname=None, verbose=False, *args, **kwds):
   function = "hhgR"
   assert npyfile, work_dir
   n, start, end = map(int, (n, start, end))
   assert n > 0 and start >= 0 and end > 0
+  if type(verbose) == str and verbose.lower() in ("none", "f", "false"):
+    verbose = False
   if batchname is None or batchname in ("None", "NONE", "none"):
     batchname = "%s_%s_%d_%d" % \
       (os.path.basename(npyfile), function, start, end)
+  # Load HHG library from R installation.
+  r('library("HHG2x2")')
+
+  if verbose:
+    live_test()
 
   # Do not recreate existing files.
   output_fname = os.path.join(work_dir, batchname+".npy")
@@ -79,19 +86,17 @@ def main(npyfile=None, work_dir=None, n=None, start=None, end=None, batchname=No
       raise
     n_values = np.sum(shared_mask)
 
-    # Load HHG library from current directory.
-    r('library("HHG2x2", lib.loc="HHG_R")')
     # Put vector pair in R namespace
-    robjects.globalenv["x"] = M[x][shared_mask]
-    robjects.globalenv["y"] = M[y][shared_mask]
+    robjects.globalenv["x"] = M[x][shared_mask].data
+    robjects.globalenv["y"] = M[y][shared_mask].data
     # Execute HHG algorithm in R.
     r('Dx = as.matrix(dist((x),diag=TRUE,upper=TRUE))')
     r('Dy = as.matrix(dist((y),diag=TRUE,upper=TRUE))')
     HHG = r('myHHG(Dx,Dy)')
     # Extract results from R namespace; normalize
     SUM_CHI[i], SUM_LR[i], MAX_CHI[i], MAX_LR[i] = \
-        float(HHG.rx('sum_chisquared')[0][0]) / (n_values)/(n_values-1)/(n_values-2), \
-        float(HHG.rx('sum_lr')[0][0]) / (n_values)/(n_values-1)/(n_values-2)/np.log(2), \
+        float(HHG.rx('sum_chisquared')[0][0]) / ((n_values)*(n_values-2)*(n_values-3)), \
+        float(HHG.rx('sum_lr')[0][0]) / ((n_values)*(n_values-2)*(n_values-3)), \
         float(HHG.rx('max_chisquared')[0][0]) / (n_values-2), \
         float(HHG.rx('max_lr')[0][0]) / (n_values-2)/np.log(2)
     if np.isnan(SUM_CHI[i]):
@@ -102,7 +107,9 @@ def main(npyfile=None, work_dir=None, n=None, start=None, end=None, batchname=No
       n_nan_max_chi += 1
     if np.isnan(MAX_LR[i]):
       n_nan_max_lr += 1
-
+    if verbose:
+      print "%d: %d %.4f %.4f %.4f %.4f" % (i, n_values, SUM_CHI[i], SUM_LR[i], MAX_CHI[i], MAX_LR[i])
+      
   print "Computed %d pairs for %s" % (end-start, batchname)
   print "%d sum_chi nans, %d sum_lr nans, %d max_chi nans, %d max_lr nans" % \
       (n_nan_sum_chi, n_nan_sum_lr, n_nan_max_chi, n_nan_max_lr)
@@ -131,6 +138,22 @@ def main(npyfile=None, work_dir=None, n=None, start=None, end=None, batchname=No
   np.save(output_fname, MAX_LR)
   print "Saved %s." % output_fname
 
+
+def live_test(n_values=80):
+  print "Test run for identity function n=%d..." % (n_values)
+  robjects.globalenv["x"] = np.arange(n_values)
+  robjects.globalenv["y"] = np.arange(n_values)
+  r('Dx = as.matrix(dist((x),diag=TRUE,upper=TRUE))')
+  r('Dy = as.matrix(dist((y),diag=TRUE,upper=TRUE))')
+  HHG = r('myHHG(Dx,Dy)')
+  print HHG
+  SUM_CHI_TEST, SUM_LR_TEST, MAX_CHI_TEST, MAX_LR_TEST = \
+      float(HHG.rx('sum_chisquared')[0][0]) / ((n_values)*(n_values-2)*(n_values-3)), \
+      float(HHG.rx('sum_lr')[0][0]) / ((n_values)*(n_values-2)*(n_values-3)), \
+      float(HHG.rx('max_chisquared')[0][0]) / (n_values-2), \
+      float(HHG.rx('max_lr')[0][0]) / (n_values-2)/np.log(2)
+  print "Max at %d: %.4f %.4f %.4f %.4f" % (n_values, SUM_CHI_TEST, SUM_LR_TEST, MAX_CHI_TEST, MAX_LR_TEST)
+  
   
 if __name__ == "__main__":
   print sys.argv

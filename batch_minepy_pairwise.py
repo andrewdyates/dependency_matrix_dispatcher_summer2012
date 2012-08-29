@@ -74,7 +74,7 @@ def main(npyfile=None, work_dir=None, n=None, start=None, end=None, batchname=No
     except IndexError:
       print "WARNING! INDEX ERROR! i %d, x %d, y %d, n %d" %(i,x,y,n)
       raise
-    mine.score(M[x][shared_mask], M[y][shared_mask])
+    mine.score(M[x][shared_mask].data, M[y][shared_mask].data)
     MIC[i], MAS[i], MEV[i], MCN[i] = mine.mic(), mine.mas(), mine.mev(), mine.mcn()
     if np.isnan(MIC[i]):
       n_nan_mic += 1
