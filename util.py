@@ -139,7 +139,6 @@ def count_tab_rows(tabfile):
   x = len([None for f in open(tabfile) if f[0] not in ('\n', '#')])
   return x
 
-
 def fork_qsub_submit(qsub_script):
   p = subprocess.Popen("qsub", stdin=subprocess.PIPE)
   p.communicate(input=qsub_script)

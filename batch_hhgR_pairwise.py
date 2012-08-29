@@ -74,9 +74,10 @@ def main(npyfile=None, work_dir=None, n=None, start=None, end=None, batchname=No
   print "Starting to write %d pairs for %s" % (end-start, batchname)
   for i, j in enumerate(xrange(start, end)):
     if i % REPORT_N == 0:
-      print "Generating pair %d (to %d) in %s..." % \
-        (i, end-1, batchname)
-    x, y = inv_sym_idx(i, n)
+      print "Generating pair %d, #%d to %d in %s..." % \
+        (j, i, end-1, batchname)
+    # XXX WARNING THIS MAY BE WRONG!!!!!!
+    x, y = inv_sym_idx(j, n)
     assert x >= 0 and y >= 0
     # Mask values with at least one missing value in pair.
     try:

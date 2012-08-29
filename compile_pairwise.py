@@ -32,11 +32,15 @@ def main(path, outpath_prefix, n=None, npy_fname=None):
   M = np.zeros(n, dtype=np.float32)
   B = np.zeros(n, dtype=np.bool)
   n_set_total, n_dupe_total, n_nan_total = 0, 0, 0
+  Q_last = None
   for fname in os.listdir(path):
     m = RX.match(fname)
     if m:
       start, end = int(m.group(1)), int(m.group(2))
       Q = np.load(os.path.join(path,fname))
+      # Check to make sure that Q is not the same as last Q.
+      if Q_last is not None:
+        assert np.sum(Q - Q_last) > 0.01, "Matrix segment seems repeated..."
       n_set, n_dupe, n_nan = 0, 0, 0
       for i, x in enumerate(range(start, end)):
         M[x] = Q[i]
@@ -47,6 +51,7 @@ def main(path, outpath_prefix, n=None, npy_fname=None):
           n_set += 1
         else:
           n_dupe += 1
+      Q_last = Q
       print "%.2f%% Complete: Set %d (%d dupes, %d nan) from %s. Expected %d." % \
           ((end-start)/n_set*100, n_set, n_dupe, n_nan, fname, end-start)
       n_set_total += n_set

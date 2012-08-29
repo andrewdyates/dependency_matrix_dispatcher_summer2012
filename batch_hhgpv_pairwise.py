@@ -14,7 +14,7 @@ Unlike other batch_pairwise.py script, this computes several matrices at once; o
   each of the HHG statistics.
 
 EXAMPLE MANUAL USE:
-  time python $HOME/dependency_matrix_dispatcher/batch_hhgR_pairwise.py npyfile=/fs/lustre/osu6683/GSE7307.normed.tab.pkl work_dir=/fs/lustre/osu6683/gse7307/hhgR_test n=54675 start=0 end=10 batchname=hhgR_test verbose=True
+  time python $HOME/dependency_matrix_dispatcher/batch_hhgpv_pairwise.py npyfile=/fs/lustre/osu6683/GSE7307.normed.tab.pkl work_dir=/fs/lustre/osu6683/gse7307/hhgR_test n=54675 start=0 end=10 batchname=hhgR_test verbose=True
 """
 from util import *
 import numpy as np
@@ -27,10 +27,11 @@ from rpy2 import robjects
 from rpy2.robjects import r
 from rpy2.robjects.packages import importr
 import rpy2.robjects.numpy2ri
+from scipy.stats import pearsonr
 rpy2.robjects.numpy2ri.activate()
 REPORT_N = 50000
 
-def main(npyfile=None, work_dir=None, n=None, start=None, end=None, batchname=None, verbose=False, *args, **kwds):
+def main(npyfile=None, work_dir=None, n=None, start=None, end=None, batchname=None, verbose=False, monte=200, *args, **kwds):
   function = "hhgR"
   assert npyfile, work_dir
   n, start, end = map(int, (n, start, end))
@@ -43,9 +44,9 @@ def main(npyfile=None, work_dir=None, n=None, start=None, end=None, batchname=No
   # Load HHG library from R installation.
   r('library("HHG2x2")')
 
-  if verbose:
-    live_test()
-    sys.exit(1)
+#  if verbose:
+#    live_test()
+#    sys.exit(1)
 
   # Do not recreate existing files.
   output_fname = os.path.join(work_dir, batchname+".npy")
@@ -70,14 +71,23 @@ def main(npyfile=None, work_dir=None, n=None, start=None, end=None, batchname=No
   else:
     print "Loading as level 0 numpy.MaskedArray pickle"
     M = ma.load(npyfile)
-  SUM_CHI, SUM_LR, MAX_CHI, MAX_LR = np.zeros(end-start), np.zeros(end-start), np.zeros(end-start), np.zeros(end-start)
-  n_nan_sum_chi, n_nan_sum_lr, n_nan_max_chi, n_nan_max_lr = 0, 0, 0, 0
+    
+  PV, MONTE = np.zeros(end-start), np.zeros(end-start)
+  n_nan_pv, n_nan_monte = 0, 0
+  print "Default alpha_hypothesis: %f" % (0.05/np.log(n))
+  print "Max monte iterations: %d" % (monte)
+  print "Total number of hypotheses (n choose 2): %d" % (n)
+  robjects.globalenv["m"] = n
+  robjects.globalenv["monte"] = monte
+  
   print "Starting to write %d pairs for %s" % (end-start, batchname)
   for i, j in enumerate(xrange(start, end)):
+
     if i % REPORT_N == 0:
-      print "Generating pair %d (to %d) in %s..." % \
-        (i, end-1, batchname)
-    x, y = inv_sym_idx(i, n)
+      print "Generating pair %d (to %d), (#%d of %d total) in %s..." % \
+        (j, end-1, i+1, (end-start), batchname)
+    x, y = inv_sym_idx(j, n)
+
     assert x >= 0 and y >= 0
     # Mask values with at least one missing value in pair.
     try:
@@ -90,26 +100,24 @@ def main(npyfile=None, work_dir=None, n=None, start=None, end=None, batchname=No
     # Put vector pair in R namespace
     robjects.globalenv["x"] = M[x][shared_mask].data
     robjects.globalenv["y"] = M[y][shared_mask].data
+
     # Execute HHG algorithm in R.
     r('Dx = as.matrix(dist((x),diag=TRUE,upper=TRUE))')
     r('Dy = as.matrix(dist((y),diag=TRUE,upper=TRUE))')
-    HHG = r('myHHG(Dx,Dy)')
-    # Extract results from R namespace; normalize
-    SUM_CHI[i], SUM_LR[i], MAX_CHI[i], MAX_LR[i] = \
-        float(HHG.rx('sum_chisquared')[0][0]) / ((n_values)*(n_values-2)*(n_values-3)), \
-        float(HHG.rx('sum_lr')[0][0]) / ((n_values)*(n_values-2)*(n_values-3)), \
-        float(HHG.rx('max_chisquared')[0][0]) / (n_values-2), \
-        float(HHG.rx('max_lr')[0][0]) / (n_values-2)/np.log(2)
-    if np.isnan(SUM_CHI[i]):
-      n_nan_sum_chi += 1
-    if np.isnan(SUM_LR[i]):
-      n_nan_sum_lr += 1
-    if np.isnan(MAX_CHI[i]):
-      n_nan_max_chi += 1
-    if np.isnan(MAX_LR[i]):
-      n_nan_max_lr += 1
+    print pearsonr(robjects.globalenv["x"], robjects.globalenv["y"])
+    
+    PVHHG = r('pvHHG(Dx,Dy,monte=monte, M=m)')
+    PV[i], MONTE[i], a, b = \
+        float(PVHHG.rx('pv')[0][0]), \
+        int(PVHHG.rx('output_monte')[0][0]), \
+        float(PVHHG.rx('A_threshold')[0][0]), \
+        float(PVHHG.rx('B_threshold')[0][0])
+    if np.isnan(PV[i]):
+      n_nan_pv += 1
+    if np.isnan(MONTE[i]):
+      n_nan_monte += 1
     if verbose:
-      print "%d: %d %.4f %.4f %.4f %.4f" % (i, n_values, SUM_CHI[i], SUM_LR[i], MAX_CHI[i], MAX_LR[i])
+      print "%d at n=%d: pv=%.8f monte=%d a=%.4f b=%.4f" % (i, n_values, PV[i], MONTE[i], a, b)
       
   print "Computed %d pairs for %s" % (end-start, batchname)
   print "%d sum_chi nans, %d sum_lr nans, %d max_chi nans, %d max_lr nans" % \
@@ -140,7 +148,7 @@ def main(npyfile=None, work_dir=None, n=None, start=None, end=None, batchname=No
   print "Saved %s." % output_fname
 
 
-def live_test(n_values=80, m=1000000, monte=100000):
+def live_test(n_values=700, m=1000000, monte=1000):
   print "LIVE TEST pvHHG"
   print "Test run for identity function n=%d..." % (n_values)
   print "Default alpha_hypothesis: %f" % (0.05/np.log(m))
@@ -148,15 +156,17 @@ def live_test(n_values=80, m=1000000, monte=100000):
   print "Total number of hypotheses (n choose 2): %d" % m
   robjects.globalenv["x"] = np.arange(n_values)
   robjects.globalenv["y"] = np.arange(n_values)
+  robjects.globalenv["m"] = m
+  robjects.globalenv["monte"] = monte
   r('Dx = as.matrix(dist((x),diag=TRUE,upper=TRUE))')
   r('Dy = as.matrix(dist((y),diag=TRUE,upper=TRUE))')
-  PVHHG = r('pvHHG(Dx,Dy,monte=monte, M=M)')
+  PVHHG = r('pvHHG(Dx,Dy,monte=monte, M=m)')
   print PVHHG
   PV_TEST, MONTE_TEST, A_THRESHOLD, B_THRESHOLD = \
-      float(HHG.rx('pv')[0][0]), \
-      int(HHG.rx('output_monte')[0][0]), \
-      float(HHG.rx('A_threshold')[0][0]), \
-      float(HHG.rx('B_threshold')[0][0]), \
+      float(PVHHG.rx('pv')[0][0]), \
+      int(PVHHG.rx('output_monte')[0][0]), \
+      float(PVHHG.rx('A_threshold')[0][0]), \
+      float(PVHHG.rx('B_threshold')[0][0])
   print "Max at %d: %.8f %d %.4f %.4f" % (n_values, PV_TEST, MONTE_TEST, A_THRESHOLD, B_THRESHOLD)
   
   
