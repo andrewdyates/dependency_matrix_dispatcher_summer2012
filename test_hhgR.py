@@ -37,6 +37,23 @@ for name, value in HHG.iteritems():
   
 print float(HHG.rx('sum_chisquared')[0][0])
 
+m=1000000
+monte=100000
+robjects.globalenv["monte"] = monte
+robjects.globalenv["M"] = m
+print "Default alpha_hypothesis: %f" % (0.05/np.log(m))
+print "Max monte iterations: %d" % monte
+print "Total number of hypotheses (n choose 2): %d" % m
+
+PVHHG = r('pvHHG(Dx,Dy,monte=monte, M=M)')
+print PVHHG
+print 2
+for name, value in PVHHG.iteritems():
+  print type(value)
+  print type(value[0])
+  print name, float(value[0])
+
+
 
 
 # This works.
