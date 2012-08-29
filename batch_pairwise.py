@@ -34,6 +34,7 @@ def main(npyfile=None, work_dir=None, function=None, n=None, start=None, end=Non
   else:
     end = int(end)
 
+  # Load data file
   print "Loading %s..." % npyfile
   if npyfile.rpartition('.')[2].lower() == 'pkl':
     print "Loading as level 2 pickle"
@@ -41,10 +42,11 @@ def main(npyfile=None, work_dir=None, function=None, n=None, start=None, end=Non
   else:
     print "Loading as level 0 numpy.MaskedArray pickle"
     M = ma.load(npyfile)
-  M = ma.load(npyfile)
+  
   f = FUNCTIONS[function]
   if function == "dcor":
     print "dCOR implementation:", DCOR_LIB
+    
   R = np.zeros(end-start)
   n_nan = 0
   print "Starting to write %d pairs for %s" % (end-start, batchname)
@@ -52,12 +54,14 @@ def main(npyfile=None, work_dir=None, function=None, n=None, start=None, end=Non
     if i % REPORT_N == 0:
       print "Generating pair %d (to %d) in %s..." % \
         (i, end-1, batchname)
-    x, y = inv_sym_idx(i, n)
+    x, y = inv_sym_idx(j, n)
     assert x >= 0 and y >= 0
-    # TODO: mask missing values like shared_mask = ~(M1[offset].mask | M2[i].mask)
+    idx_check = sym_idx(x,y,n)
+    assert idx_check == j and idx_check >= start and idx_check < end
+
     try:
       shared_mask = ~(M[x].mask | M[y].mask)
-      R[i] = f(M[x][shared_mask], M[y][shared_mask])
+      R[i] = f(M[x][shared_mask].data, M[y][shared_mask].data)
     except IndexError:
       print "WARNING! INDEX ERROR! i %d, x %d, y %d, n %d" %(i,x,y,n)
       raise
@@ -66,6 +70,8 @@ def main(npyfile=None, work_dir=None, function=None, n=None, start=None, end=Non
 
   print "Computed %d pairs for %s" % (end-start, batchname)
   print "%d nans" % (n_nan)
+  if n_nans > 0:
+    print "!!!WARNING: There exists at least one (%d) not-a-numbers (nans) in this batch." % n_nans
 
   output_fname = os.path.join(work_dir, batchname+".npy")
   print "Saving results %d through %d as %s. (zero-indexed)" % (start, end-1, output_fname)
