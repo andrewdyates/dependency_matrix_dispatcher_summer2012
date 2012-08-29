@@ -17,7 +17,7 @@ x = np.array([1,2,3,4,5,6,7,8,10,12,14,100,1002,1003])
 y = np.array([1,2,3,4,5,6,7,1,10,12,18,100,1002,1003])
 n = np.size(x)
 
-r('library("HHG2x2", lib.loc="HHG_R")')
+r('library("HHG2x2")')
 robjects.globalenv["x"] = x
 robjects.globalenv["y"] = y
 
