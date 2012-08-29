@@ -2,7 +2,7 @@
 """Compute batch of pairwise dependencies.
 
 EXAMPLE MANUAL USE:
-  time python $HOME/dependency_matrix_dispatcher/batch_pairwise.py function=dcor npyfile=/fs/lustre/osu6683/GSE7307.normed.tab.pkl work_dir=/fs/lustre/osu6683/gse7307/hhgR_test n=54675 start=0 end=10 batchname=hhgR_test verbose=True
+  time python $HOME/dependency_matrix_dispatcher/batch_pairwise.py function=dcor npyfile=/fs/lustre/osu6683/GSE7307.normed.tab.pkl work_dir=/fs/lustre/osu6683/gse7307/manual_test n=54675 start=5 end=15 verbose=True
 """
 from util import *
 import numpy.ma as ma
@@ -54,7 +54,7 @@ def main(npyfile=None, work_dir=None, function=None, n=None, start=None, end=Non
   if function == "dcor":
     print "dCOR implementation:", DCOR_LIB
 
-  # Compute
+  # Compute.
   R = np.zeros(end-start)
   print "Starting to write %d pairs for %s" % (end-start, batchname)
   for i, j in enumerate(xrange(start, end)):
@@ -77,7 +77,6 @@ def main(npyfile=None, work_dir=None, function=None, n=None, start=None, end=Non
     if verbose:
       print i, j, x, y, R[i]
 
-  assert end-start == np.size(R)
   n_nan = np.sum(np.isnan(R))
   print "Computed %d pairs for %s" % (end-start, batchname)
   print "%d nans" % (n_nan)

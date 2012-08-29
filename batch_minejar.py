@@ -1,6 +1,8 @@
 #!/usr/bin/python
 """As called by dispatch_minejar
 
+OBSOLETE
+
 python /nfs/01/osu6683/dependency_matrix_dispatcher/batch_minejar.py tabfile=/fs/lustre/osu6683/GSE15745.GPL6104.mRNA.normed.tab offset=22180 minejar_file=/fs/lustre/osu6683/MINE.jar work_dir=/fs/lustre/osu6683
 """
 import sys, os
