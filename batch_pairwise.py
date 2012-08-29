@@ -54,7 +54,7 @@ def main(npyfile=None, work_dir=None, function=None, n=None, start=None, end=Non
   if function == "dcor":
     print "dCOR implementation:", DCOR_LIB
 
-  # Compute.
+  # Create vector containers
   R = np.zeros(end-start)
   print "Starting to write %d pairs for %s" % (end-start, batchname)
   for i, j in enumerate(xrange(start, end)):
@@ -62,17 +62,15 @@ def main(npyfile=None, work_dir=None, function=None, n=None, start=None, end=Non
       print "Generating pair %d (to %d) in %s..." % \
         (i, end-1, batchname)
     x, y = inv_sym_idx(j, n)
-    assert x >= 0 and y >= 0
+    assert x >= 0 and y >= 0 and x < np.size(M,0) and y < np.size(M,0)
     idx_check = sym_idx(x,y,n)
     assert idx_check == j and idx_check >= start and idx_check < end
 
-    try:
-      shared_mask = ~(M[x].mask | M[y].mask)
-    except IndexError:
-      print "WARNING! INDEX ERROR! i %d, x %d, y %d, n %d" %(i,x,y,n)
-      raise
+    shared_mask = ~(M[x].mask | M[y].mask)
     X, Y = M[x][shared_mask].data, M[y][shared_mask].data
     assert np.size(X) == np.size(Y) <= np.size(M,1)
+
+    
     R[i] = f(X,Y)
     if verbose:
       print i, j, x, y, R[i]

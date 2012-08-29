@@ -46,7 +46,6 @@ FUNCTIONS = {
   'hhgR': "batch_hhgR_pairwise.py",
   }
 
-
 def move_numpy_to_workdir(work_dir, npy_fname, do_copy=False):
   work_npy_fname = os.path.join(work_dir, os.path.basename(npy_fname))
   if not os.path.exists(work_npy_fname):

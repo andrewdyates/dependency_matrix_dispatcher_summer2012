@@ -69,11 +69,8 @@ def main(npyfile=None, work_dir=None, n=None, start=None, end=None, batchname=No
     assert x >= 0 and y >= 0
     # Create minepy computation object
     mine = minepy.MINE(alpha=alpha, c=c)
-    try:
-      shared_mask = ~(M[x].mask | M[y].mask)
-    except IndexError:
-      print "WARNING! INDEX ERROR! i %d, x %d, y %d, n %d" %(i,x,y,n)
-      raise
+    shared_mask = ~(M[x].mask | M[y].mask)
+
     mine.score(M[x][shared_mask].data, M[y][shared_mask].data)
     MIC[i], MAS[i], MEV[i], MCN[i] = mine.mic(), mine.mas(), mine.mev(), mine.mcn()
     if np.isnan(MIC[i]):
