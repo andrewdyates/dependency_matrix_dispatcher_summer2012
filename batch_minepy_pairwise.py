@@ -67,15 +67,14 @@ def main(npyfile=None, work_dir=None, n=None, start=None, end=None, batchname=No
         (i, end-1, batchname)
     x, y = inv_sym_idx(i, n)
     assert x >= 0 and y >= 0
-    # TODO: mask missing values like shared_mask = ~(M1[offset].mask | M2[i].mask)
     # Create minepy computation object
     mine = minepy.MINE(alpha=alpha, c=c)
-    shared_mask = ~(M[x].mask | M[y].mask)
     try:
-      mine.score(M[x][shared_mask], M[y][shared_mask])
+      shared_mask = ~(M[x].mask | M[y].mask)
     except IndexError:
       print "WARNING! INDEX ERROR! i %d, x %d, y %d, n %d" %(i,x,y,n)
       raise
+    mine.score(M[x][shared_mask], M[y][shared_mask])
     MIC[i], MAS[i], MEV[i], MCN[i] = mine.mic(), mine.mas(), mine.mev(), mine.mcn()
     if np.isnan(MIC[i]):
       n_nan_mic += 1

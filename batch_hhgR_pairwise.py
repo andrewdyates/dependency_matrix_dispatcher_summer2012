@@ -24,11 +24,10 @@ from py_symmetric_matrix import *
 import sys
 # R and Rpy2 must be installed.
 from rpy2 import robjects
+from rpy2.robjects import r
 from rpy2.robjects.packages import importr
 import rpy2.robjects.numpy2ri
 rpy2.robjects.numpy2ri.activate()
-# r_base = importr('base')
-
 REPORT_N = 50000
 
 def main(npyfile=None, work_dir=None, n=None, start=None, end=None, batchname=None, *args, **kwds):
@@ -39,10 +38,6 @@ def main(npyfile=None, work_dir=None, n=None, start=None, end=None, batchname=No
   if batchname is None or batchname in ("None", "NONE", "none"):
     batchname = "%s_%s_%d_%d" % \
       (os.path.basename(npyfile), function, start, end)
-  alpha = float(alpha)
-  c = int(c)
-  assert alpha > 0 and alpha < 1
-  assert c >= 0
 
   # Do not recreate existing files.
   output_fname = os.path.join(work_dir, batchname+".npy")
@@ -67,8 +62,8 @@ def main(npyfile=None, work_dir=None, n=None, start=None, end=None, batchname=No
   else:
     print "Loading as level 0 numpy.MaskedArray pickle"
     M = ma.load(npyfile)
-  MIC, MAS, MEV, MCN = np.zeros(end-start), np.zeros(end-start), np.zeros(end-start), np.zeros(end-start)
-  n_nan_mic, n_nan_mas, n_nan_mev, n_nan_mcn = 0, 0, 0, 0
+  SUM_CHI, SUM_LR, MAX_CHI, MAX_LR = np.zeros(end-start), np.zeros(end-start), np.zeros(end-start), np.zeros(end-start)
+  n_nan_sum_chi, n_nan_sum_lr, n_nan_max_chi, n_nan_max_lr = 0, 0, 0, 0
   print "Starting to write %d pairs for %s" % (end-start, batchname)
   for i, j in enumerate(xrange(start, end)):
     if i % REPORT_N == 0:
@@ -76,50 +71,64 @@ def main(npyfile=None, work_dir=None, n=None, start=None, end=None, batchname=No
         (i, end-1, batchname)
     x, y = inv_sym_idx(i, n)
     assert x >= 0 and y >= 0
-    # TODO: mask missing values like shared_mask = ~(M1[offset].mask | M2[i].mask)
-    # Create minepy computation object
-    mine = minepy.MINE(alpha=alpha, c=c)
-    shared_mask = ~(M[x].mask | M[y].mask)
+    # Mask values with at least one missing value in pair.
     try:
-      mine.score(M[x][shared_mask], M[y][shared_mask])
+      shared_mask = ~(M[x].mask | M[y].mask)
     except IndexError:
       print "WARNING! INDEX ERROR! i %d, x %d, y %d, n %d" %(i,x,y,n)
       raise
-    MIC[i], MAS[i], MEV[i], MCN[i] = mine.mic(), mine.mas(), mine.mev(), mine.mcn()
-    if np.isnan(MIC[i]):
-      n_nan_mic += 1
-    if np.isnan(MAS[i]):
-      n_nan_mas += 1
-    if np.isnan(MEV[i]):
-      n_nan_mev += 1
-    if np.isnan(MCN[i]):
-      n_nan_mcn += 1
+    n_values = np.sum(shared_mask)
+
+    # Load HHG library from current directory.
+    r('library("HHG2x2", lib.loc="HHG_R")')
+    # Put vector pair in R namespace
+    robjects.globalenv["x"] = M[x][shared_mask]
+    robjects.globalenv["y"] = M[y][shared_mask]
+    # Execute HHG algorithm in R.
+    r('Dx = as.matrix(dist((x),diag=TRUE,upper=TRUE))')
+    r('Dy = as.matrix(dist((y),diag=TRUE,upper=TRUE))')
+    HHG = r('myHHG(Dx,Dy)')
+    # Extract results from R namespace; normalize
+    SUM_CHI[i], SUM_LR[i], MAX_CHI[i], MAX_LR[i] = \
+        float(HHG.rx('sum_chisquared')[0][0]) / (n_values)/(n_values-1)/(n_values-2), \
+        float(HHG.rx('sum_lr')[0][0]) / (n_values)/(n_values-1)/(n_values-2)/np.log(2), \
+        float(HHG.rx('max_chisquared')[0][0]) / (n_values-2), \
+        float(HHG.rx('max_lr')[0][0]) / (n_values-2)/np.log(2)
+    if np.isnan(SUM_CHI[i]):
+      n_nan_sum_chi += 1
+    if np.isnan(SUM_LR[i]):
+      n_nan_sum_lr += 1
+    if np.isnan(MAX_CHI[i]):
+      n_nan_max_chi += 1
+    if np.isnan(MAX_LR[i]):
+      n_nan_max_lr += 1
 
   print "Computed %d pairs for %s" % (end-start, batchname)
-  print "%d mic nans, %d mas nans, %d mev nans, %d mcn nans" % (n_nan_mic, n_nan_mas, n_nan_mev, n_nan_mcn)
-  n_bad = sum((n_nan_mic, n_nan_mas, n_nan_mev, n_nan_mcn))
+  print "%d sum_chi nans, %d sum_lr nans, %d max_chi nans, %d max_lr nans" % \
+      (n_nan_sum_chi, n_nan_sum_lr, n_nan_max_chi, n_nan_max_lr)
+  n_bad = sum((n_nan_sum_chi, n_nan_sum_lr, n_nan_max_chi, n_nan_max_lr))
   if n_bad > 0:
     print "!!!WARNING: There exists at least one (%d) not-a-numbers (nans) in this batch." % n_bad
 
   # Save each of 4 matrices
-  output_fname = os.path.join(work_dir, batchname+".mic.npy")
-  print "Saving MIC results %d through %d as %s. (zero-indexed)" % (start, end-1, output_fname)
-  np.save(output_fname, MIC)
+  output_fname = os.path.join(work_dir, batchname+".sum_chi.npy")
+  print "Saving SUM CHI results %d through %d as %s. (zero-indexed)" % (start, end-1, output_fname)
+  np.save(output_fname, SUM_CHI)
   print "Saved %s." % output_fname
 
-  output_fname = os.path.join(work_dir, batchname+".mas.npy")
-  print "Saving MAS results %d through %d as %s. (zero-indexed)" % (start, end-1, output_fname)
-  np.save(output_fname, MAS)
+  output_fname = os.path.join(work_dir, batchname+".sum_lr.npy")
+  print "Saving SUM LOG RATIO results %d through %d as %s. (zero-indexed)" % (start, end-1, output_fname)
+  np.save(output_fname, SUM_LR)
   print "Saved %s." % output_fname
 
-  output_fname = os.path.join(work_dir, batchname+".mev.npy")
-  print "Saving MEV results %d through %d as %s. (zero-indexed)" % (start, end-1, output_fname)
-  np.save(output_fname, MEV)
+  output_fname = os.path.join(work_dir, batchname+".max_chi.npy")
+  print "Saving MAX CHI results %d through %d as %s. (zero-indexed)" % (start, end-1, output_fname)
+  np.save(output_fname, MAX_CHI)
   print "Saved %s." % output_fname
 
-  output_fname = os.path.join(work_dir, batchname+".mcn.npy")
-  print "Saving MCN results %d through %d as %s. (zero-indexed)" % (start, end-1, output_fname)
-  np.save(output_fname, MCN)
+  output_fname = os.path.join(work_dir, batchname+".max_lr.npy")
+  print "Saving MAX LOG RATIO results %d through %d as %s. (zero-indexed)" % (start, end-1, output_fname)
+  np.save(output_fname, MAX_LR)
   print "Saved %s." % output_fname
 
   

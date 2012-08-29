@@ -24,12 +24,12 @@ robjects.globalenv["y"] = y
 r('Dx = as.matrix(dist((x),diag=TRUE,upper=TRUE))')
 r('Dy = as.matrix(dist((y),diag=TRUE,upper=TRUE))')
 HHG = r('myHHG(Dx,Dy)')
-print HHG
 # Names:
 #   sum_chisquared
 #   sum_lr
 #   max_chisquared
 #   max_lr
+print HHG
 for name, value in HHG.iteritems():
   print type(value)
   print type(value[0])
