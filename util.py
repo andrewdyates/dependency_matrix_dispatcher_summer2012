@@ -43,6 +43,7 @@ FUNCTIONS = {
   'dcor': lambda x,y: dcov_all(x,y)[1],
    # Custom batch scripts.
   'minepy': "batch_minepy_pairwise.py",
+  'hhgR': "batch_hhgR_pairwise.py",
   }
 
 
