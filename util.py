@@ -4,8 +4,8 @@ import subprocess
 import datetime
 import cPickle as pickle
 # Comment cpy dcor, uncomment native python dcor for pychecker.
-from dcor_cpy import *
-#from dcor import *
+#from dcor_cpy import *
+from dcor import *
 import os
 import errno
 from numpy import ma
