@@ -10,7 +10,8 @@ import numpy as np
 class HHGBatch(Batch):
   MNAMES = ["SUM_CHI", "SUM_LR", "MAX_CHI", "MAX_LR"]
 
-  def compute(self, i, x, y):
+  def compute(self, x, y, i):
+    assert type(int(i)) == int
     assert np.size(x) == np.size(y) and i >= 0
     n = np.size(x)
     robjects.globalenv["x"] = x

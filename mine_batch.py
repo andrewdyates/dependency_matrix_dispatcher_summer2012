@@ -11,7 +11,8 @@ class MINEBatch(Batch):
     self.mine = minepy.MINE(alpha=alpha, c=c)
     super(MINEBatch, self).__init__(*args, **kwds)
     
-  def compute(self, i, x, y):
+  def compute(self, x, y, i):
+    assert type(int(i)) == int
     assert np.size(x) == np.size(y) and i >= 0
     self.mine.score(x, y)
     self.Matrices['MIC'][i] = self.mine.mic()

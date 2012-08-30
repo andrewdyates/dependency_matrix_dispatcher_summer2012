@@ -24,6 +24,7 @@ class Batch(object):
   
   def get(self, i):
     """Return list of values computed for index i"""
+    assert i >= 0
     return dict([(n, self.Matrices[n][i]) for n in self.MNAMES])
   
   def nans(self):
@@ -32,11 +33,11 @@ class Batch(object):
   
   def save(self, work_dir, batchname):
     """Save result matrices to file."""
-    out_names = []
-    for name, M in self.Matrices:
+    out_names = {}
+    for name, M in self.Matrices.items():
       output_fname = os.path.join(work_dir, "%s.%s.npy" % (batchname, name))
       np.save(output_fname, M)
-      out_names.append(output_fname)
+      out_names[name] = output_fname
     return out_names
 
   

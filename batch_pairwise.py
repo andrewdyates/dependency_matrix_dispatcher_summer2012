@@ -28,6 +28,12 @@ def main(npyfile=None, work_dir=None, function=None, n=None, start=None, end=Non
     end = int(end)
   n = int(n)
   assert n > 0 and start >= 0 and end > 0
+  
+  if not os.path.exists(work_dir):
+    print "WARNING: work_dir %s does not exist." % work_dir
+    if verbose:
+      print "Creating work_dir in verbose mode...."
+      make_dir(work_dir)
 
   # If batchname not provided, compute default value. Use batchname in output file name.
   if batchname is None or batchname.lower() in ("false", "f", "none"):
@@ -50,10 +56,11 @@ def main(npyfile=None, work_dir=None, function=None, n=None, start=None, end=Non
     M = ma.load(npyfile)
 
   # Get batch fucntion handler for this function.
-  F = FUNCTIONS[function]
+  size = end-start
+  F = FUNCTIONS[function](size)
 
   # Compute pairs using batch handler `F`
-  print "Starting to write %d pairs for %s" % (end-start, batchname)
+  print "Starting to write %d pairs for %s" % (size, batchname)
   for i, j in enumerate(xrange(start, end)):
     if i % REPORT_N == 0:
       print "Generating pair %d (to %d) in %s..." % \
@@ -72,7 +79,8 @@ def main(npyfile=None, work_dir=None, function=None, n=None, start=None, end=Non
     F.compute(X,Y,i)
     if verbose:
       d = F.get(i)
-      print " ".join(["%s=%f"%(k,v) for k,v in d.items()])
+      s = " ".join(["%s=%f"%(k,v) for k,v in d.items()])
+      print "%d->%d: " % (i,j), s
 
   print "Computed %d pairs for %s" % (end-start, batchname)
   n_nans = F.nans()
@@ -82,7 +90,8 @@ def main(npyfile=None, work_dir=None, function=None, n=None, start=None, end=Non
 
   out_names = F.save(work_dir, batchname)
   print "Saved results %d through %d as %d matrices:" % (start, end-1, len(out_names))
-  print ", ".join(out_names)
+  for name, out_name in out_names.items():
+    print "%s: %s" % (name, out_name)
   
   
 if __name__ == "__main__":
