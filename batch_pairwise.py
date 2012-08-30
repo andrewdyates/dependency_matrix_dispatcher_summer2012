@@ -12,7 +12,7 @@ import cPickle as pickle
 
 #BATCH_CMD = "time python %(script_path)s/batch_pairwise.py npyfile=%(npyfile)s offset=%(offset)d k=%(k)d work_dir=%(work_dir)s function=%(function)s n=%(n)d >> %(stdout_fname)s 2>> %(stderr_fname)s"
 
-REPORT_N = 50000
+REPORT_N = 10000
 
 def main(npyfile=None, work_dir=None, function=None, n=None, start=None, end=None, batchname=None, verbose=False, *args, **kwds):
   
@@ -66,8 +66,8 @@ def main(npyfile=None, work_dir=None, function=None, n=None, start=None, end=Non
   print "Starting to write %d pairs for %s" % (size, batchname)
   for i, j in enumerate(xrange(start, end)):
     if i % REPORT_N == 0:
-      print "Generating pair %d (to %d) in %s..." % \
-        (i, end-1, batchname)
+      print "Generating pair %d (to %d), (#%d of %d total) in %s..." % \
+        (j, end-1, i+1, size, batchname)
     # Carefully check indexing schemes...
     x, y = inv_sym_idx(j, n)
     assert x >= 0 and y >= 0 and x < np.size(M,0) and y < np.size(M,0)
@@ -85,14 +85,14 @@ def main(npyfile=None, work_dir=None, function=None, n=None, start=None, end=Non
       s = " ".join(["%s=%f"%(k,v) for k,v in d.items()])
       print "%d->%d: " % (i,j), s
 
-  print "Computed %d pairs for %s" % (end-start, batchname)
+  print "Computed %d pairs for %s" % (size, batchname)
   n_nans = F.nans()
   print "%d nans" % (n_nans)
   if n_nans > 0:
     print "!!!WARNING: There exists at least one (%d) not-a-numbers (nans) in this batch." % (n_nans)
 
   out_names = F.save(work_dir, batchname)
-  print "Saved results %d through %d as %d matrices:" % (start, end-1, len(out_names))
+  print "Saved %d results, %d through %d, as %d matrices:" % (size, start, end-1, len(out_names))
   for name, out_name in out_names.items():
     print "%s: %s" % (name, out_name)
   
