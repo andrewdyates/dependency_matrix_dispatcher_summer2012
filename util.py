@@ -3,9 +3,6 @@
 import subprocess
 import datetime
 import cPickle as pickle
-# Comment cpy dcor, uncomment native python dcor for pychecker.
-#from dcor_cpy import *
-from dcor import *
 import os
 import errno
 from numpy import ma
@@ -31,19 +28,20 @@ echo "Function: %(function)s"
 mpiexec parallel-command-processor %(dispatch_script)s
 """
 
-def euclidean(x,y):
-  q=x-y
-  return ma.sqrt((q*q.T).sum())
+from batch import *
+from dcor_batch import *
+from mine_batch import *
+from hhg_batch import *
+
 
 FUNCTIONS = {
-  'pearson': lambda x, y: mstats.pearsonr(x,y)[0],
-  'spearman': lambda x, y: mstats.spearmanr(x,y)[0],
-#  'euclidean': euclidean,
-#  'kendalltau': lambda x,y: mstats.kendalltau(x,y)[0],
-  'dcor': lambda x,y: dcov_all(x,y)[1],
-   # Custom batch scripts.
-  'minepy': "batch_minepy_pairwise.py",
-  'hhgR': "batch_hhgR_pairwise.py",
+  'pearson': PCCBatch,
+  'spearman': SpearmanBatch,
+  'dcor': DcorBatch,
+  'minepy': MINEBatch,
+  'hhgR': HHGBatch,
+  #  'euclidean': EuclideanBatch,
+  #  'kendalltau': KendallBatch,
   }
 
 def move_numpy_to_workdir(work_dir, npy_fname, do_copy=False):

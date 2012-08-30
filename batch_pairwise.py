@@ -49,42 +49,40 @@ def main(npyfile=None, work_dir=None, function=None, n=None, start=None, end=Non
     print "Loading as level 0 numpy.MaskedArray pickle"
     M = ma.load(npyfile)
 
-  # TODO: Revise this as some kind of factory selector.
-  f = FUNCTIONS[function]
-  if function == "dcor":
-    print "dCOR implementation:", DCOR_LIB
+  # Get batch fucntion handler for this function.
+  F = FUNCTIONS[function]
 
-  # Create vector containers
-  R = np.zeros(end-start)
+  # Compute pairs using batch handler `F`
   print "Starting to write %d pairs for %s" % (end-start, batchname)
   for i, j in enumerate(xrange(start, end)):
     if i % REPORT_N == 0:
       print "Generating pair %d (to %d) in %s..." % \
         (i, end-1, batchname)
+    # Carefully check indexing schemes...
     x, y = inv_sym_idx(j, n)
     assert x >= 0 and y >= 0 and x < np.size(M,0) and y < np.size(M,0)
     idx_check = sym_idx(x,y,n)
     assert idx_check == j and idx_check >= start and idx_check < end
 
+    # Remove samples with at least one missing value.
     shared_mask = ~(M[x].mask | M[y].mask)
     X, Y = M[x][shared_mask].data, M[y][shared_mask].data
     assert np.size(X) == np.size(Y) <= np.size(M,1)
 
-    
-    R[i] = f(X,Y)
+    F.compute(X,Y,i)
     if verbose:
-      print i, j, x, y, R[i]
+      d = F.get(i)
+      print " ".join(["%s=%f"%(k,v) for k,v in d.items()])
 
-  n_nan = np.sum(np.isnan(R))
   print "Computed %d pairs for %s" % (end-start, batchname)
-  print "%d nans" % (n_nan)
-  if n_nan > 0:
-    print "!!!WARNING: There exists at least one (%d) not-a-numbers (nans) in this batch." % (n_nan)
+  n_nans = F.nans()
+  print "%d nans" % (n_nans)
+  if n_nans > 0:
+    print "!!!WARNING: There exists at least one (%d) not-a-numbers (nans) in this batch." % (n_nans)
 
-  output_fname = os.path.join(work_dir, batchname+".npy")
-  print "Saving results %d through %d as %s. (zero-indexed)" % (start, end-1, output_fname)
-  np.save(output_fname, R)
-  print "Saved %s." % output_fname
+  out_names = F.save(work_dir, batchname)
+  print "Saved results %d through %d as %d matrices:" % (start, end-1, len(out_names))
+  print ", ".join(out_names)
   
   
 if __name__ == "__main__":
