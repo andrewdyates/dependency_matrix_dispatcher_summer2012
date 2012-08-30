@@ -12,15 +12,21 @@ def make_Ms(size, names):
 class Batch(object):
   MNAMES = []
   
-  def __init__(self, size):
+  def __init__(self, size=1):
     """Initialize results matrices."""
     assert size is not None and size > 0
+    self.size = size
     self.Matrices = make_Ms(size, self.MNAMES)
     
   def compute(self, x, y, i):
     """Compute measure of dependencies and save to results matrices."""
     assert np.size(x) == np.size(y) and i >= 0
     raise Exception, "Not Implemented."
+  
+  def compute_one(self, x, y):
+    """Compute one value in the first matrix entry, return it."""
+    self.compute(x, y, 0)
+    return self.get(0)
   
   def get(self, i):
     """Return list of values computed for index i"""
@@ -45,7 +51,7 @@ class PCCBatch(Batch):
   MNAMES = ["PEARSON", "PEARSON_PV"]
   def compute(self, x, y, i):
     assert np.size(x) == np.size(y) and i >= 0
-    self.Matrices["PCC"][i], self.Matrices["PEARSON_PV"][i] = mstats.pearsonr(x,y)
+    self.Matrices["PEARSON"][i], self.Matrices["PEARSON_PV"][i] = mstats.pearsonr(x,y)
 
 class SpearmanBatch(Batch):
   MNAMES = ["SPEARMAN", "SPEARMAN_PV"]

@@ -38,11 +38,12 @@ FUNCTIONS = {
   'pearson': PCCBatch,
   'spearman': SpearmanBatch,
   'dcor': DcorBatch,
-  'minepy': MINEBatch,
-  'hhgR': HHGBatch,
-  #  'euclidean': EuclideanBatch,
-  #  'kendalltau': KendallBatch,
+  'mine': MINEBatch,
+  'hhg': HHGBatch,
+  'euclidean': EuclideanBatch,
+  'kendalltau': KendallBatch,
   }
+IGNORE = ['euclidean', 'kendalltau']
 
 def move_numpy_to_workdir(work_dir, npy_fname, do_copy=False):
   work_npy_fname = os.path.join(work_dir, os.path.basename(npy_fname))

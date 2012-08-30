@@ -58,6 +58,9 @@ def main(npyfile=None, work_dir=None, function=None, n=None, start=None, end=Non
   # Get batch fucntion handler for this function.
   size = end-start
   F = FUNCTIONS[function](size)
+  if verbose:
+    print "Vebose: Try F on n=700 identity."
+    print F.compute_one(np.arange(700), np.arange(700))
 
   # Compute pairs using batch handler `F`
   print "Starting to write %d pairs for %s" % (size, batchname)

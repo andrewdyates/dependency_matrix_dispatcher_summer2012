@@ -7,9 +7,10 @@ from batch import *
 class MINEBatch(Batch):
   MNAMES = ["MIC", "MAS", "MEV", "MCN"]
 
-  def __init__(self, alpha=0.6, c=15, *args, **kwds):
+  def __init__(self, size, alpha=0.6, c=15):
+    assert alpha > 0 and alpha <= 1, alpha
     self.mine = minepy.MINE(alpha=alpha, c=c)
-    super(MINEBatch, self).__init__(*args, **kwds)
+    super(MINEBatch, self).__init__(size)
     
   def compute(self, x, y, i):
     assert type(int(i)) == int
