@@ -98,4 +98,5 @@ def main(npyfile=None, work_dir=None, function=None, n=None, start=None, end=Non
   
   
 if __name__ == "__main__":
+  print sys.argv
   main(**dict([s.split('=') for s in sys.argv[1:]]))

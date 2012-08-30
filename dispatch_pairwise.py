@@ -129,4 +129,5 @@ def dispatch_pairwise(tabfile=None, pkl_file=None, outdir=WORK_DIR, function=Non
 
 
 if __name__ == "__main__":
+  print sys.argv
   dispatch_pairwise(**dict([s.split('=') for s in sys.argv[1:]]))
