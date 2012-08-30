@@ -10,7 +10,7 @@ import numpy as np
 class HHGBatch(Batch):
   MNAMES = ["SUM_CHI", "SUM_LR", "MAX_CHI", "MAX_LR"]
 
-  def __init__(self, size):
+  def __init__(self, size=1):
     # Load HHG library from R installation.
     r('library("HHG2x2")')
     super(HHGBatch, self).__init__(size)
@@ -27,6 +27,6 @@ class HHGBatch(Batch):
     v = n*(n-2)*(n-3) # max sum_chi value
     lg = np.log(2)
     self.Matrices["SUM_CHI"][i] = float(HHG.rx('sum_chisquared')[0][0]) / v
-    self.Matrices["SUM_LR"][i]  = float(HHG.rx('sum_lr')[0][0]) / v / lg
+    self.Matrices["SUM_LR"][i]  = float(HHG.rx('sum_lr')[0][0]) / v / lg / (2/np.e)
     self.Matrices["MAX_CHI"][i] = float(HHG.rx('max_chisquared')[0][0]) / (n-2)
     self.Matrices["MAX_LR"][i]  = float(HHG.rx('max_lr')[0][0]) / (n-2) / lg
