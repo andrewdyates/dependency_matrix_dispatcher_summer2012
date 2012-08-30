@@ -10,6 +10,7 @@ All matrices are assumed to be row vectors, column dimensions.
 * Spearman's Correlation (rho)
 * Distance Correlation (dCOR)
 * MINE (using the minepy module at http://minepy.sourceforge.net/)
+* HHG (Heller Heller Gorfine 2012 statistic)
 
 Workflow
 --------
@@ -28,22 +29,9 @@ execution and compiles them all into a single .npy matrix
 2. batch_pairwise.py
 3. compile_pairwise.py
 
-_Alternate batch_*.py for dispatch_pairwise.py_
-* batch_minepy_pairwise.py: Save 4 MINE statistics (MIC, MEV, MCN, MAS) computed using cmine Python wrapper
-
 ###Compute n*m pairs of dependencies between two matrices.###
 
 1. dispatch_dual_pairwise.py
 2. batch_dual_pairwise.py
 3. compile_dual_pairwise.py
-
-###[depreciated] Compute n choose 2 pairs of dependencies using Reshef et al. MINE.jar###
-
-1. dispatch_minejar.py
-2. batch_minejar.py
-3. compile_minejar.py
-
-
-
-
 
