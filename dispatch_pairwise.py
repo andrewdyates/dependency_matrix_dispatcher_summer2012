@@ -29,9 +29,13 @@ def dispatch_pairwise(tabfile=None, pkl_file=None, outdir=WORK_DIR, function=Non
       jobname_base = os.path.basename(pkl_file)
   else:
     jobname_base = jobname
-  
+
+  # If no function is set, run for all 'non-ignored' functions.
   if function is None:
-    all_functions = FUNCTIONS
+    all_functions = {}
+    for name in FUNCTIONS:
+      if name not in IGNORE:
+        all_functions[name] = FUNCTIONS[name]
   else:
     assert function in FUNCTIONS
     all_functions = {function: FUNCTIONS[function]}
