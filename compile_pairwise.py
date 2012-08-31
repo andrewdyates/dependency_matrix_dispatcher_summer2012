@@ -63,7 +63,6 @@ def main(path, outpath_prefix, n=None, npy_fname=None, precision=32):
     m = RX.match(fname)
     if m:
       # Parse file name into parts.
-      set_id = m.group('id')
       start = int(m.group('start'))
       end = int(m.group('end'))
       matrix_name = m.group('matrix')
