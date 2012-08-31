@@ -108,8 +108,8 @@ def main(path, outpath_prefix, n=None, npy_fname=None, precision=32):
   # Save results for each result.
   for matrix_name, R in Results.items():
     print "Saving results for matrix %s..." % (matrix_name)
-    print "%.2f%% Complete. Set %d (%d dupes, %d nan) from %s. Expected %d." % \
-        (R.n_set_total/n*100, R.n_set_total, R.n_dupe_total, R.n_nan_total, path, n)
+    print "%.2f%% Complete. Set %d (%d dupes, %d nan, %d unmasked) from %s. Expected %d." % \
+        (R.n_set_total/n*100, R.n_set_total, R.n_dupe_total, R.n_nan_total, np.sum(R.B), path, n)
     M_fname = "%s.%s.values.npy" % (outpath_prefix, matrix_name)
     B_fname = "%s.%s.isset.npy" % (outpath_prefix, matrix_name)
     
@@ -117,12 +117,10 @@ def main(path, outpath_prefix, n=None, npy_fname=None, precision=32):
     print "Saved %s." % (M_fname)
     if R.n_set_total != n:
       np.save(B_fname, R.B)
-      print "Because values are missing, saved %s." % (B_fname)
-      assert np.sum(R.B) < R.n_set_total
+      print "!!! Because values are missing, saved %s." % (B_fname)
     else:
       print "No values missing; did not save boolean 'isset' matrix."
-      assert np.sum(R.B) == R.n_set_total
-      
+
   print "Compilation of %s complete. Saved %d result matrices." % (path, len(Results))
 
   
