@@ -63,8 +63,10 @@ def main(path, outpath_prefix, n=None, npy_fname=None, precision=32):
     m = RX.match(fname)
     if m:
       # Parse file name into parts.
-      set_id, start, end, matrix_name = \
-          m.group('id'), int(m.group('start')), int(m.group('end')), int(m.group('matrix_name'))
+      set_id = m.group('id')
+      start = int(m.group('start'))
+      end = int(m.group('end'))
+      matrix_name = m.group('matrix')
       Q = np.load(os.path.join(path, fname))
       
       # Get Result for this matrix_name
@@ -75,7 +77,16 @@ def main(path, outpath_prefix, n=None, npy_fname=None, precision=32):
         
       # Check to make sure that Q is not the same as last Q for this Result matrix.
       if R.Q_last is not None:
-        assert np.sum(Q - R.Q_last) > 0.01, "Matrix segment seems repeated..."
+        try:
+          assert np.size(Q) != np.size(R.Q_last) or np.abs(np.sum(Q - R.Q_last)) > 0
+        except AssertionError:
+          print "Matrix segment seems repeated..."
+          print fname
+          print Q[:5]
+          print R.Q_last[:5]
+          print (Q-R.Q_last)[:5]
+          print np.sum(Q-R.Q_last)
+          raise
       n_set, n_dupe, n_nan = 0, 0, 0
       for i, x in enumerate(range(start, end)):
         R.M[x] = Q[i]
@@ -99,8 +110,8 @@ def main(path, outpath_prefix, n=None, npy_fname=None, precision=32):
     print "Saving results for matrix %s..." % (matrix_name)
     print "%.2f%% Complete. Set %d (%d dupes, %d nan) from %s. Expected %d." % \
         (R.n_set_total/n*100, R.n_set_total, R.n_dupe_total, R.n_nan_total, path, n)
-    M_fname = outpath_prefix+"%s.%s.values.npy" % (outpath_prefix, matrix_name)
-    B_fname = outpath_prefix+"%s.%s.isset.npy" % (outpath_prefix, matrix_name)
+    M_fname = "%s.%s.values.npy" % (outpath_prefix, matrix_name)
+    B_fname = "%s.%s.isset.npy" % (outpath_prefix, matrix_name)
     
     np.save(M_fname, R.M)
     print "Saved %s." % (M_fname)
@@ -111,7 +122,7 @@ def main(path, outpath_prefix, n=None, npy_fname=None, precision=32):
     else:
       print "No values missing; did not save boolean 'isset' matrix."
       assert np.sum(R.B) == R.n_set_total
-
+      
   print "Compilation of %s complete. Saved %d result matrices." % (path, len(Results))
 
   

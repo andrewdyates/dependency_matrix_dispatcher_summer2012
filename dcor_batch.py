@@ -1,8 +1,8 @@
 from batch import Batch
 import numpy as np
 # Comment cpy dcor, uncomment native python dcor for pychecker.
-#from dcor_cpy import *
-from dcor import *
+from dcor_cpy import *
+#from dcor import *
 
 
 class DcorBatch(Batch):
