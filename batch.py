@@ -53,6 +53,12 @@ class PCCBatch(Batch):
     assert np.size(x) == np.size(y) and i >= 0
     self.Matrices["PEARSON"][i], self.Matrices["PEARSON_PV"][i] = mstats.pearsonr(x,y)
 
+class CovBatch(Batch):
+  MNAMES = ["COVARIANCE"]
+  def compute(self, x, y, i):
+    assert np.size(x) == np.size(y) and i >= 0
+    self.Matrices["COVARIANCE"][i] = np.cov(x,y)[0,1]
+    
 class SpearmanBatch(Batch):
   MNAMES = ["SPEARMAN", "SPEARMAN_PV"]
   def compute(self, x, y, i):

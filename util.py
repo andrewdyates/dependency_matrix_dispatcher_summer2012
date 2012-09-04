@@ -36,6 +36,7 @@ from hhg_batch import *
 
 FUNCTIONS = {
   'pearson': PCCBatch,
+  'covariance': CovBatch,
   'spearman': SpearmanBatch,
   'dcor': DcorBatch,
   'mine': MINEBatch,
