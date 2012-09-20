@@ -49,18 +49,22 @@ class Batch(object):
   
 class PCCBatch(Batch):
   MNAMES = ["PEARSON", "PEARSON_PV"]
+  HAS_NEG = True
   def compute(self, x, y, i):
     assert np.size(x) == np.size(y) and i >= 0
     self.Matrices["PEARSON"][i], self.Matrices["PEARSON_PV"][i] = mstats.pearsonr(x,y)
 
 class CovBatch(Batch):
-  MNAMES = ["COVARIANCE"]
+  MNAMES = ["COVARIANCE", "STD_PRODUCT"]
+  HAS_NEG = True
   def compute(self, x, y, i):
     assert np.size(x) == np.size(y) and i >= 0
     self.Matrices["COVARIANCE"][i] = np.cov(x,y)[0,1]
+    self.Matrices["STD_PRODUCT"][i] = np.std(x) * np.std(y)
     
 class SpearmanBatch(Batch):
   MNAMES = ["SPEARMAN", "SPEARMAN_PV"]
+  HAS_NEG = True
   def compute(self, x, y, i):
     assert np.size(x) == np.size(y) and i >= 0
     self.Matrices["SPEARMAN"][i], self.Matrices["SPEARMAN_PV"][i] = mstats.spearmanr(x,y)
