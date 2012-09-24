@@ -3,6 +3,12 @@ dependency_matrix_dispatcher
 Compute all-pair dependency matrices in parallel.
 All matrices are assumed to be row vectors, column dimensions.
 
+TODO:
+* move dependency computations into own module
+* merge dispatches into single function
+* include compilation in dispatch
+
+
 *See individual file docstrings for use details.*
 
 ####Computes####
