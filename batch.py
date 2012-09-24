@@ -55,7 +55,7 @@ class PCCBatch(Batch):
     self.Matrices["PEARSON"][i], self.Matrices["PEARSON_PV"][i] = mstats.pearsonr(x,y)
 
 class CovBatch(Batch):
-  MNAMES = ["COVARIANCE", "STD_PRODUCT"]
+  MNAMES = ["COVARIANCE", "STD_PRODUCT", "MIN_STD"]
   HAS_NEG = True
   def compute(self, x, y, i):
     assert np.size(x) == np.size(y) and i >= 0

@@ -26,6 +26,7 @@ source .bash_profile
 echo "Dispatching %(num_jobs)d jobs each with %(k)d pairs from %(num_pairs)s total pairs."
 echo "Function: %(function)s"
 mpiexec parallel-command-processor %(dispatch_script)s
+echo "Job complete. Compile results."
 """
 
 from batch import *
