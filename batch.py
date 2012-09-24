@@ -60,6 +60,7 @@ class CovBatch(Batch):
   def compute(self, x, y, i):
     assert np.size(x) == np.size(y) and i >= 0
     self.Matrices["COVARIANCE"][i] = np.cov(x,y)[0,1]
+    self.Matrices["MIN_STD"][i] = min(np.std(x),np.std(y))
     self.Matrices["STD_PRODUCT"][i] = np.std(x) * np.std(y)
     
 class SpearmanBatch(Batch):

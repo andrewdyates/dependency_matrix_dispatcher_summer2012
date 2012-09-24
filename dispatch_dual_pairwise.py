@@ -7,7 +7,7 @@ USE EXAMPLE:
 
 python $HOME/dependency_matrix_dispatcher/dispatch_dual_pairwise.py outdir=/fs/lustre/osu6683/gse15745 tabfile_1=$HOME/gse15745/GSE15745.GPL6104.mRNA.normed.tab tabfile_2=$HOME/gse15745/GSE15745.GPL8178.miRNA.normed.tab tabfile_1_coltitles=$HOME/gse15745/GSE15745.GSE6104.subject_titles.txt tabfile_2_coltitles=$HOME/gse15745/GSE15745.GSE8178.subject_titles.txt dry=True
 
-python $HOME/dependency_matrix_dispatcher/dispatch_dual_pairwise.py outdir=/fs/lustre/osu6683/tcga_amia tabfile_1=$HOME/tcga/450konly_cpg_data.tab.aligned.tab tabfile_2=$HOME/tcga/data_Tumor_mRNA.txt.aligned.tab dry=True
+python $HOME/dependency_matrix_dispatcher/dispatch_dual_pairwise.py outdir=/fs/lustre/osu6683/tcga_amia tabfile_1=$HOME/tcga/450konly_cpg_data.tab.aligned.tab tabfile_2=$HOME/tcga/data_Tumor_mRNA.txt.aligned.tab function=dcor dry=True
 """
 from __future__ import division
 from util import *
