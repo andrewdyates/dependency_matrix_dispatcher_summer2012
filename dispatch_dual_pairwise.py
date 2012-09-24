@@ -1,9 +1,13 @@
 #!/usr/bin/python
 """Dispatch pairwise dependency computations between two matrices.
+Also column aligns matrices.
+TODO: column alignment should be a separate module.
 
 USE EXAMPLE:
 
 python $HOME/dependency_matrix_dispatcher/dispatch_dual_pairwise.py outdir=/fs/lustre/osu6683/gse15745 tabfile_1=$HOME/gse15745/GSE15745.GPL6104.mRNA.normed.tab tabfile_2=$HOME/gse15745/GSE15745.GPL8178.miRNA.normed.tab tabfile_1_coltitles=$HOME/gse15745/GSE15745.GSE6104.subject_titles.txt tabfile_2_coltitles=$HOME/gse15745/GSE15745.GSE8178.subject_titles.txt dry=True
+
+python $HOME/dependency_matrix_dispatcher/dispatch_dual_pairwise.py outdir=/fs/lustre/osu6683/tcga_amia tabfile_1=$HOME/tcga/450konly_cpg_data.tab.aligned.tab tabfile_2=$HOME/tcga/data_Tumor_mRNA.txt.aligned.tab dry=True
 """
 from __future__ import division
 from util import *
@@ -15,7 +19,9 @@ import numpy.ma as ma
 BATCH_CMD = "time python %(script_path)s/batch_dual_pairwise.py npyfile_1=%(npyfile_1)s npyfile_2=%(npyfile_2)s offset=%(offset)d work_dir=%(work_dir)s function=%(function)s > %(stdout_fname)s 2> %(stderr_fname)s"
 
 def dispatch_dual_pairwise(tabfile_1=None, tabfile_2=None, tabfile_1_coltitles=None, tabfile_2_coltitles=None, outdir=WORK_DIR, function=None, k=200000, dry=False, start_offset=0, work_dir=WORK_DIR, jobname=None, n_nodes=6, n_ppn=12, walltime='12:00:00'):
-  assert tabfile_1 and tabfile_2 and tabfile_1_coltitles and tabfile_2_coltitles
+  assert tabfile_1 and tabfile_2
+  if not (tabfile_1_coltitles and tabfile_2_coltitles):
+    print "No coltitles file specified; assume matrices are already column aligned."
   n_nodes, n_ppn, start_offset, k = map(int, (n_nodes, n_ppn, start_offset, k))
   assert k > 1 and start_offset >= 0 and n_nodes > 0 and n_ppn > 0
   if jobname is None: 
@@ -54,52 +60,58 @@ def dispatch_dual_pairwise(tabfile_1=None, tabfile_2=None, tabfile_1_coltitles=N
   print_matrix_stats(M1)
   print "Created Matrix 2: %s" % npy_fname_2
   print_matrix_stats(M2)
-  
-  # Column-Align two matrices. 
-  npy_basename_1 = os.path.basename(npy_fname_1)
-  npy_basename_2 = os.path.basename(npy_fname_2)
-  npy_aligned_fname_1 = os.path.join(work_dir, "%s_aligned_with_%s.npy" % (npy_basename_1, npy_basename_2))
-  npy_aligned_fname_2 = os.path.join(work_dir, "%s_aligned_with_%s.npy" % (npy_basename_2, npy_basename_1))
-  titles1, set1, idx1 = read_samples(tabfile_1_coltitles)
-  titles2, set2, idx2 = read_samples(tabfile_2_coltitles)
-  assert len(titles1) == len(set1) == np.size(M1, 1)
-  assert len(titles2) == len(set2) == np.size(M2, 1)
-  cols = []
-  for s in titles1:
-    if s in set2:
-      cols.append((idx1[s], idx2[s]))
-  # Align columns in copies of matrices.
-  print "Aligned %d cols from %s and %d cols from %s to %d shared columns by sample ID." % \
-    (len(titles1), tabfile_1_coltitles, len(titles2), tabfile_2_coltitles, len(cols))
-  m1_idxs, m2_idxs = np.array(zip(*[(x, y) for x, y in cols]))
-  M1_aligned = M1[:,m1_idxs]
-  M2_aligned = M2[:,m2_idxs]
-  print "Created (%d x %d) M1 and (%d x %d) M2" % (n1, len(cols), n2, len(cols))
-  print "M1_aligned: (%d x %d). M2_aligned: (%d x %d)." % \
-    (np.size(M1_aligned,0),np.size(M1_aligned,1),np.size(M2_aligned,0),np.size(M2_aligned,1))
-  print "M1_aligned"
-  print_matrix_stats(M1_aligned)
-  print "M2_aligned"
-  print_matrix_stats(M2_aligned)
+
+  if tabfile_1_coltitles and tabfile_2_coltitles:
+    # Column-Align two matrices.
+    titles1, set1, idx1 = read_samples(tabfile_1_coltitles)
+    titles2, set2, idx2 = read_samples(tabfile_2_coltitles)
+    assert len(titles1) == len(set1) == np.size(M1, 1)
+    assert len(titles2) == len(set2) == np.size(M2, 1)
+    cols = []
+    for s in titles1:
+      if s in set2:
+        cols.append((idx1[s], idx2[s]))
+    # Align columns in copies of matrices.
+    print "Aligned %d cols from %s and %d cols from %s to %d shared columns by sample ID." % \
+        (len(titles1), tabfile_1_coltitles, len(titles2), tabfile_2_coltitles, len(cols))
+    m1_idxs, m2_idxs = np.array(zip(*[(x, y) for x, y in cols]))
+    M1_aligned = M1[:,m1_idxs]
+    M2_aligned = M2[:,m2_idxs]
+    print "Created (%d x %d) M1 and (%d x %d) M2" % (n1, len(cols), n2, len(cols))
+    # Save column titles, verify that they are equal
+    aligned_col_titles = []
+    for x, y in cols:
+      s1 = titles1[x]
+      s2 = titles2[y]
+      assert s1 == s2
+      aligned_col_titles.append(s1)
+      aligned_col_titles_fname = os.path.join(work_dir, "%s_vs_%s.coltitles.txt" % (npy_basename_1, npy_basename_2))
+    fp = open(aligned_col_titles_fname, "w")
+    fp.write(",".join(aligned_col_titles)); fp.write("\n")
+    fp.close()
+    print "Wrote %d aligned column titles at %s." % (len(aligned_col_titles), aligned_col_titles_fname)
+    assert len(aligned_col_titles) == np.size(M1_aligned, 1) == np.size(M2_aligned, 1)
+    assert np.size(M1_aligned, 0) <= np.size(M2_aligned, 0)
+    
+  else:
+    M1_aligned = M1
+    M2_aligned = M2
+    print "M1_aligned: (%d x %d). M2_aligned: (%d x %d)." % \
+        (np.size(M1_aligned,0),np.size(M1_aligned,1),np.size(M2_aligned,0),np.size(M2_aligned,1))
+    print "M1_aligned"
+    print_matrix_stats(M1_aligned)
+    print "M2_aligned"
+    print_matrix_stats(M2_aligned)
   
   # Save column aligned matrices.
+  npy_basename_1 = os.path.basename(npy_fname_1)
+  npy_basename_2 = os.path.basename(npy_fname_2)
+  npy_aligned_fname_1 = os.path.join(work_dir, "%s_aligned_with_%s.pkl" % (npy_basename_1, npy_basename_2))
+  npy_aligned_fname_2 = os.path.join(work_dir, "%s_aligned_with_%s.pkl" % (npy_basename_2, npy_basename_1))
+
   print "Saving %s and %s..." % (npy_aligned_fname_1, npy_aligned_fname_2)
-  ma.dump(M1_aligned, npy_aligned_fname_1)
-  ma.dump(M2_aligned, npy_aligned_fname_2)
-  # Save column titles, verify that they are equal
-  aligned_col_titles = []
-  for x, y in cols:
-    s1 = titles1[x]
-    s2 = titles2[y]
-    assert s1 == s2
-    aligned_col_titles.append(s1)
-  aligned_col_titles_fname = os.path.join(work_dir, "%s_vs_%s.coltitles.txt" % (npy_basename_1, npy_basename_2))
-  fp = open(aligned_col_titles_fname, "w")
-  fp.write(",".join(aligned_col_titles)); fp.write("\n")
-  fp.close()
-  print "Wrote %d aligned column titles at %s." % (len(aligned_col_titles), aligned_col_titles_fname)
-  assert len(aligned_col_titles) == np.size(M1_aligned, 1) == np.size(M2_aligned, 1)
-  assert np.size(M1_aligned, 0) <= np.size(M2_aligned, 0)
+  pickle.dump(M1_aligned, open(npy_aligned_fname_1, "w"), protocol=2)
+  pickle.dump(M2_aligned, open(npy_aligned_fname_2, "w"), protocol=2)
   
   # Write jobs to dispatch script in a list.
   t = tstamp()

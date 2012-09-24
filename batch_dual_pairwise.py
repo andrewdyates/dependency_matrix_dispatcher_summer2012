@@ -1,12 +1,13 @@
 #!/usr/bin/python
 """Compute dependencies between two matrices.
+Compare row "offset" of matrix M1 with all other rows of matrix M2.
+
+TODO: this should be integrated with batch_pairwise to reduce redundant code.
 
 1) load both matrices
 2) get offset row of first matrix
 3) compute all dependencies of offset row with other matrix
 4) save results to disk
-
-Only compute dCOR for pairs with both values present.
 """
 from util import *
 import numpy.ma as ma
@@ -14,9 +15,9 @@ import sys
 
 #BATCH_CMD = "time python %(script_path)s/batch_dual_pairwise.py npyfile_1=%(npyfile_1)s npyfile_2=%(npyfile_2)s offset=%(offset)d work_dir=%(work_dir)s function=%(function)s >> %(stdout_fname)s 2>> %(stderr_fname)s"
 
-REPORT_N = 1000
+REPORT_N = 50000
 
-def main(npyfile_1=None, npyfile_2=None, offset=None, work_dir=None, function=None, batchname=None):
+def main(npyfile_1=None, npyfile_2=None, offset=None, work_dir=None, function=None, batchname=None, verbose=False):
   assert npyfile_1 and npyfile_2 and work_dir
   assert function in FUNCTIONS
   offset = int(offset)
@@ -30,34 +31,41 @@ def main(npyfile_1=None, npyfile_2=None, offset=None, work_dir=None, function=No
   assert offset < np.size(M1, 0)
   assert np.count_nonzero(np.isnan(M1.compressed())) == 0
   assert np.count_nonzero(np.isnan(M2.compressed())) == 0
-  f = FUNCTIONS[function]
-  if function == "dcor":
-    print "dCOR implementation:", DCOR_LIB
-  n = np.size(M2, 0)
-  R = np.zeros(n)
-  n_nan = 0
-  print "Starting to write %d pairs for %s" % (n, batchname)
-  for i in xrange(n):
+
+  # Get batch function handler for this function.
+  size = np.size(M2,0)
+  F = FUNCTIONS[function](size)
+  if verbose:
+    print "Vebose: Try F on n=700 identity."
+    print F.compute_one(np.arange(700), np.arange(700))
+
+  # Compute pairs using batch handler `F`
+  print "Starting to write %d pairs for %s" % (size, batchname)
+  for i in xrange(np.size(M2,0)):
     if i % REPORT_N == 0:
       print "Generating pair %d (to %d) in %s..." % \
-        (i, n, batchname)
+        (i, size, batchname)
     # Mask pairs with at least one missing value
     shared_mask = ~(M1[offset].mask | M2[i].mask)
-    R[i] = f(M1[offset][shared_mask], M2[i][shared_mask])
+    X, Y = M1[offset][shared_mask].data, M2[i][shared_mask].data
+    assert np.size(X) == np.size(Y) <= np.size(M1,1)
 
-    if np.isnan(R[i]):
-      n_nan += 1
-      m1_masked = np.count_nonzero(M1.mask)
-      m2_masked = np.count_nonzero(M2.mask)
-      print "NAN!", offset, i, m1_masked, m2_masked
+    F.compute(X,Y,i)
+    if verbose:
+      d = F.get(i)
+      s = " ".join(["%s=%f"%(k,v) for k,v in d.items()])
+      print "%d: " % (i), s
     
   print "Computed %d pairs for %s using %s." % (n, batchname, function)
-  print "%d nans" % (n_nan)
+  n_nans = F.nans()
+  print "%d nans" % (n_nans)
+  if n_nans > 0:
+    print "!!!WARNING: There exists at least one (%d) not-a-numbers (nans) in this batch." % (n_nans)
 
-  output_fname = os.path.join(work_dir, batchname+".npy")
-  print "Saving %d results at %s." % (n, output_fname)
-  np.save(output_fname, R)
-  print "Saved %s." % output_fname
+  out_names = F.save(work_dir, batchname)
+  print "Saving %d results as:" % (n)
+  for name, out_name in out_names.items():
+    print "%s: %s" % (name, out_name)
   
   
 if __name__ == "__main__":

@@ -3,6 +3,8 @@
 
 EXAMPLE MANUAL USE:
   time python $HOME/dependency_matrix_dispatcher/batch_pairwise.py function=dcor npyfile=/fs/lustre/osu6683/GSE7307.normed.tab.pkl work_dir=/fs/lustre/osu6683/gse7307/manual_test n=54675 start=5 end=15 verbose=True
+
+  parameter "n" is the number of rows (variables) in the matrix
 """
 from util import *
 import numpy.ma as ma
@@ -54,7 +56,7 @@ def main(npyfile=None, work_dir=None, function=None, n=None, start=None, end=Non
     print "Loading as level 0 numpy.MaskedArray pickle"
     M = ma.load(npyfile)
 
-  # Get batch fucntion handler for this function.
+  # Get batch function handler for this function.
   size = end-start
   F = FUNCTIONS[function](size)
   if verbose:

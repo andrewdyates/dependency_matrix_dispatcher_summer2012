@@ -112,7 +112,9 @@ def print_matrix_stats(M1):
   t1 = np.size(M1.ravel())
   print "Missing values: %d of %d (%d by %d) (%.2f%%)" % \
       (n_missing1, t1, np.size(M1,0), np.size(M1,1), n_missing1/t1)
-  print "nans: Total: %d, With Mask: %d" % (np.count_nonzero(np.isnan(M1)), np.count_nonzero(np.isnan(M1.compressed())))
+  n_unmasked_nans = np.count_nonzero(np.isnan(M1.compressed()))
+  print "nans: Total: %d, unmasked nans: %d" % (np.count_nonzero(np.isnan(M1)), n_unmasked_nans)
+  assert n_unmasked_nans == 0
 
 def make_dir(outdir):
   try:
