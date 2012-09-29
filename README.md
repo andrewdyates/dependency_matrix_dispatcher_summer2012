@@ -1,5 +1,8 @@
-dependency_matrix_dispatcher
+dependency_matrix_dispatcher_summer2012
 ============================
+#MADE OBSOLETE BY package "[mapreduce_dependency_matrix](https://github.com/andrewdyates/mapreduce_dependency_matrix)"#
+
+
 Compute all-pair dependency matrices in parallel.
 All matrices are assumed to be row vectors, column dimensions.
 
